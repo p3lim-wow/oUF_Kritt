@@ -57,8 +57,9 @@ local function style(self, unit)
 	self:SetAttribute('initial-width', 75)
 	self:SetAttribute('toggleForVehicle', true)
 
-	self:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = -1, bottom = -1, left = -1, right = -1}})
+	self:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], edgeFile = [=[Interface\ChatFrame\ChatFrameBackground]=], edgeSize = 1})
 	self:SetBackdropColor(0, 0, 0, 0.5)
+	self:SetBackdropBorderColor(0, 0, 0, 0.6)
 
 	self.Health = CreateFrame('StatusBar', nil, self)
 	self.Health:SetAllPoints(self)
@@ -94,6 +95,10 @@ local function style(self, unit)
 	self:Tag(riptide, '[krittriptide]')
 
 	self.OverrideUpdateHealth = updateHealth
+	self.DebuffHighlightBackdrop = true
+	self.DebuffHighlightFilter = true
+	self.DebuffHighlightAlpha = 0.6
+	self.SetBackdropColor = self.SetBackdropBorderColor --temporary until Ammo adds in new feature
 
 	objects[self] = true
 end

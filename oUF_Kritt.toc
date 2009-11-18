@@ -4,5 +4,6 @@
 ## Title: oUF Kritt
 ## Notes: Clean oUF raid layout designed around a restoration Shaman
 ## RequiredDeps: oUF
+## OptionalDeps: oUF_DebuffHighlight
 
 oUF_Kritt.xml
