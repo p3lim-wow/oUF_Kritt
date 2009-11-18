@@ -1,4 +1,27 @@
-﻿oUF.TagEvents['[krittshield]'] = 'UNIT_AURA'
+﻿local objects = {}
+do
+	local function InRange(unit)
+		return UnitIsConnected(unit) and not UnitIsDead(unit) and IsSpellInRange('Healing Wave', unit) == 1
+	end
+
+	local ELAPSED = 0
+	CreateFrame('Frame'):SetScript('OnUpdate', function(self, elapsed)
+		if(ELAPSED > 0.2) then
+			for object in pairs(objects) do
+				if(object:IsVisible()) then
+					local range = not not InRange(object.unit)
+					object:SetAlpha(range and 1 or 0.2)
+				end
+			end
+
+			ELAPSED = 0
+		else
+			ELAPSED = ELAPSED + elapsed
+		end
+	end)
+end
+
+oUF.TagEvents['[krittshield]'] = 'UNIT_AURA'
 oUF.Tags['[krittshield]'] = function(unit)
 	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Earth Shield')
 	return caster == 'player' and '|cff00ff00.|r'
@@ -71,6 +94,8 @@ local function style(self, unit)
 	self:Tag(riptide, '[krittriptide]')
 
 	self.OverrideUpdateHealth = updateHealth
+
+	objects[self] = true
 end
 
 oUF:RegisterStyle('Kritt', style)
