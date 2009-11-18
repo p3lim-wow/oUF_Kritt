@@ -1,0 +1,8 @@
+## Interface: 30200
+## Author: p3lim
+## Version: Alpha
+## Title: oUF Kritt
+## Notes: Clean oUF raid layout designed around a restoration Shaman
+## RequiredDeps: oUF
+
+oUF_Kritt.xml

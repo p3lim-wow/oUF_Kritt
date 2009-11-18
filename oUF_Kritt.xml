@@ -1,0 +1,9 @@
+<Ui xmlns='http://www.blizzard.com/wow/ui/'>
+	<Font name='pfont' font='Interface\AddOns\oUF_Kritt\marke.ttf' outline='NORMAL' virtual='true'>
+		<FontHeight>
+			<AbsValue val='8'/>
+		</FontHeight>
+	</Font>
+
+	<Script file='oUF_Kritt.lua'/>
+</Ui>
