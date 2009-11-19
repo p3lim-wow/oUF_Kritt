@@ -43,9 +43,10 @@ oUF.Tags['[kritthp]'] = function(unit)
 	return UnitIsDead(unit) and '|cffff0000X|r' or min / max < 0.8 and string.format('|cffff8080%.1f|r', (max - min) / 1e3)
 end
 
-local function updateHealth(self, event, unit, bar, min, max)
-	bar.bg:SetPoint('LEFT', 75 * (min / max), 0)
-	bar.bg:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
+local function updateHealth(self, event, unit)
+	local min, max = UnitHealth(unit), UnitHealthMax(unit)
+	self.health:SetPoint('LEFT', 74 * (min / max), 0)
+	self.health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
 end
 
 local function style(self, unit)
@@ -61,40 +62,42 @@ local function style(self, unit)
 	self:SetBackdropColor(0, 0, 0, 0.5)
 	self:SetBackdropBorderColor(0, 0, 0, 0.6)
 
-	self.Health = CreateFrame('StatusBar', nil, self)
-	self.Health:SetAllPoints(self)
-	self.Health:SetStatusBarTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
-	self.Health:SetStatusBarColor(1, 1, 1, 0.05)
+	local bg = self:CreateTexture(nil, 'BACKGROUND')
+	bg:SetPoint('TOPLEFT', 1, -1)
+	bg:SetPoint('BOTTOMRIGHT', -1, 1)
+	bg:SetTexture(1, 1, 1, 0.05)
 
-	self.Health.bg = self.Health:CreateTexture(nil, 'BACKGROUND')
-	self.Health.bg:SetTexture(0.6, 0.6, 0.6)
-	self.Health.bg:SetPoint('TOPRIGHT')
-	self.Health.bg:SetPoint('BOTTOMRIGHT')
-	self.Health.bg:SetPoint('LEFT')
+	local health = self:CreateTexture(nil, 'BORDER')
+	health:SetTexture(0.6, 0.6, 0.6)
+	health:SetPoint('TOPRIGHT', -1, -1)
+	health:SetPoint('BOTTOMRIGHT', -1, 1)
+	health:SetPoint('LEFT', 75, 0)
+	self:RegisterEvent('UNIT_HEALTH', updateHealth)
+	self:RegisterEvent('UNIT_HEALTHMAX', updateHealth)
+	self.health = health
 
-	local health = self.Health:CreateFontString(nil, 'ARTWORK', 'pfont')
-	health:SetPoint('RIGHT', -2, 0)
-	health:SetJustifyH('RIGHT')
-	health.frequentUpdates = true
-	self:Tag(health, '[kritthp]')
+	local missing = self:CreateFontString(nil, 'ARTWORK', 'pfont')
+	missing:SetPoint('RIGHT', -2, 0)
+	missing:SetJustifyH('RIGHT')
+	missing.frequentUpdates = true
+	self:Tag(missing, '[kritthp]')
 
-	local name = self.Health:CreateFontString(nil, 'ARTWORK', 'pfont')
-	name:SetPoint('LEFT', 3, 0)
-	name:SetPoint('RIGHT', health, 'LEFT', -2, 0)
+	local name = self:CreateFontString(nil, 'ARTWORK', 'pfont')
+	name:SetPoint('LEFT', 4, 0)
+	name:SetPoint('RIGHT', missing, 'LEFT', -2, 0)
 	name:SetJustifyH('LEFT')
 	self:Tag(name, '[krittleader][raidcolor][name]')
 
-	local shield = self.Health:CreateFontString(nil, 'ARTWORK')
+	local shield = self:CreateFontString(nil, 'ARTWORK')
 	shield:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	shield:SetPoint('TOPLEFT', -3, 16)
 	self:Tag(shield, '[krittshield]')
 
-	local riptide = self.Health:CreateFontString(nil, 'ARTWORK')
+	local riptide = self:CreateFontString(nil, 'ARTWORK')
 	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
 	self:Tag(riptide, '[krittriptide]')
 
-	self.OverrideUpdateHealth = updateHealth
 	self.DebuffHighlightBackdrop = true
 	self.DebuffHighlightFilter = true
 	self.DebuffHighlightAlpha = 0.6
