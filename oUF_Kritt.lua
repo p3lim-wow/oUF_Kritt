@@ -40,11 +40,11 @@ end
 
 oUF.Tags['[kritthp]'] = function(unit)
 	local min, max = UnitHealth(unit), UnitHealthMax(unit)
-	return UnitIsDead(unit) and '|cffff0000X|r' or min / max < 0.8 and string.format('|cffff8080%.1f|r', (max - min) / 1e3)
+	return UnitIsDead(unit) and '|cffff0000X|r' or not UnitIsConnected(unit) and '|cff333333#|r' or min / max < 0.8 and string.format('|cffff8080%.1f|r', (max - min) / 1e3)
 end
 
-local function updateHealth(self, event, unit)
-	local min, max = UnitHealth(unit), UnitHealthMax(unit)
+local function updateHealth(self)
+	local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
 	self.health:SetPoint('LEFT', 74 * (min / max), 0)
 	self.health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
 end
