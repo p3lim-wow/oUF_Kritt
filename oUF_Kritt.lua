@@ -77,10 +77,9 @@ local function style(self, unit)
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
 	self:Tag(riptide, '[krittriptide]')
 
-	self.DebuffHighlightBackdrop = true
+	self.DebuffHighlightBackdropBorder = true
 	self.DebuffHighlightFilter = true
 	self.DebuffHighlightAlpha = 0.6
-	self.SetBackdropColor = self.SetBackdropBorderColor --temporary until Ammo adds in new feature
 
 	objects[self] = true
 end
