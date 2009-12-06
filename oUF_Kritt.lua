@@ -1,4 +1,25 @@
 ﻿local objects = {}
+local debuffList = {
+	-- Koralon the Flame Watcher
+	[GetSpellInfo(67332)] = true -- Flaming Cinder
+
+	-- Beast of Northrend
+	[GetSpellInfo(66331)] = true, -- Impale
+	[GetSpellInfo(67475)] = true, -- Fire Bomb (Gormok)
+	[GetSpellInfo(66406)] = true, -- Snobolled! (Gormok)
+	[GetSpellInfo(67618)] = true, -- Paralytic Toxin (Jormungar)
+
+	-- Lord Jaraxxus
+	[GetSpellInfo(66237)] = true, -- Incinerate Flesh
+	[GetSpellInfo(66197)] = true, -- Legion Flame
+
+	-- Twin Val'kyr
+	[GetSpellInfo(66075)] = true, -- Twin Spike
+
+	-- Anub'arak
+	[GetSpellInfo(67700)] = true, -- Penetrating Cold
+	[GetSpellInfo(66012)] = true, -- Freezing Slash
+}
 
 oUF.TagEvents['[krittshield]'] = 'UNIT_AURA'
 oUF.Tags['[krittshield]'] = function(unit)
@@ -26,6 +47,18 @@ local function updateHealth(self)
 	local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
 	self.health:SetPoint('LEFT', 74 * (min / max), 0)
 	self.health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
+end
+
+local function postCreateAura(self, button, icons)
+	button:EnableMouse(false)
+	button:SetAlpha(0.75)
+	button.cd:SetReverse()
+	button.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+	button.overlay:SetTexture()
+end
+
+local function customAuraFilter(icons, unit, icon, name)
+	return debuffList[name]
 end
 
 local function style(self, unit)
@@ -76,6 +109,15 @@ local function style(self, unit)
 	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
 	self:Tag(riptide, '[krittriptide]')
+
+	self.Debuffs = CreateFrame('Frame', nil, self)
+	self.Debuffs:SetPoint('CENTER')
+	self.Debuffs:SetHeight(16)
+	self.Debuffs:SetWidth(16)
+	self.Debuffs.num = 1
+	self.Debuffs.size = 16
+	self.PostCreateAuraIcon = postCreateAura
+	self.CustomAuraFilter = customAuraFilter
 
 	self.DebuffHighlightBackdropBorder = true
 	self.DebuffHighlightFilter = true
