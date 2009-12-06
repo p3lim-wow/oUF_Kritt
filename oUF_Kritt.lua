@@ -1,4 +1,7 @@
-﻿local objects = {}
+﻿
+local HealComm = LibStub('LibHealComm-4.0')
+
+local objects = {}
 local debuffList = {
 	-- Koralon the Flame Watcher
 	[GetSpellInfo(67332)] = true -- Flaming Cinder
@@ -43,10 +46,25 @@ oUF.Tags['[kritthp]'] = function(unit)
 	return UnitIsDeadOrGhost(unit) and '|cffff0000X|r' or not UnitIsConnected(unit) and '|cff333333#|r' or min / max < 0.8 and string.format('|cffff8080%.1f|r', (max - min) / 1e3)
 end
 
+local function updateHealComm(self, event)
+	if(not UnitIsDead(self.unit) and UnitIsConnected(self.unit)) then
+		local guid = UnitGUID(self.unit)
+		local incoming = HealComm:GetHealAmount(guid, HealComm.ALL_HEALS, GetTime() + 5)
+		if(incoming) then
+			local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
+			self.HealComm:SetPoint('RIGHT', self.health, 'LEFT', (73 * (math.min(incoming * HealComm:GetHealModifier(guid), max - min) / max)) * (min / max), 0)
+			return
+		end
+	end
+
+	self.HealComm:SetPoint('RIGHT', self.health, 'LEFT')
+end
+
 local function updateHealth(self)
 	local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
 	self.health:SetPoint('LEFT', 74 * (min / max), 0)
 	self.health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
+	updateHealComm(self)
 end
 
 local function postCreateAura(self, button, icons)
@@ -87,6 +105,13 @@ local function style(self, unit)
 	self:RegisterEvent('UNIT_HEALTH', updateHealth)
 	self:RegisterEvent('UNIT_HEALTHMAX', updateHealth)
 	self.health = health
+
+	local healcomm = self:CreateTexture(nil, 'ARTWORK')
+	healcomm:SetTexture(0, 0, 0, 0.6)
+	healcomm:SetPoint('TOPLEFT', health, 1, -1)
+	healcomm:SetPoint('BOTTOMLEFT', health, 1, 1)
+	healcomm:SetPoint('RIGHT', health, 'LEFT')
+	self.HealComm = healcomm
 
 	local missing = self:CreateFontString(nil, 'ARTWORK', 'pfont')
 	missing:SetPoint('RIGHT', -2, 0)
@@ -167,3 +192,30 @@ dummy:SetScript('OnUpdate', function(self, elapsed)
 		self.elapsed = self.elapsed + elapsed
 	end
 end)
+
+--[[ LibHealComm-4.0 Support ]]
+local function HealComm_Update(...)
+	for index = 1, select('#', ...) do
+		for _, frame in pairs(oUF.objects) do
+			if(frame.unit and frame.HealComm and UnitGUID(frame.unit) == select(index, ...)) then
+				updateHealComm(frame)
+			end
+		end
+	end
+end
+
+local function HealComm_Heal(event, caster, spell, type, _, ...)
+	HealComm_Update(...)
+end
+
+local function HealComm_Modified(event, guid)
+	HealComm_Update(guid)
+end
+
+HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealStarted', HealComm_Heal)
+HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealUpdated', HealComm_Heal)
+HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealDelayed', HealComm_Heal)
+HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealStopped', HealComm_Heal)
+HealComm.RegisterCallback('oUF_Kritt', 'HealComm_ModifierChanged', HealComm_Modified)
+HealComm.RegisterCallback('oUF_Kritt', 'HealComm_GUIDDisappeared', HealComm_Modified)
+
