@@ -1,25 +1,4 @@
 ﻿local objects = {}
-do
-	local function InRange(unit)
-		return UnitIsConnected(unit) and not UnitIsDead(unit) and IsSpellInRange('Healing Wave', unit) == 1
-	end
-
-	local ELAPSED = 0
-	CreateFrame('Frame'):SetScript('OnUpdate', function(self, elapsed)
-		if(ELAPSED > 0.2) then
-			for object in pairs(objects) do
-				if(object:IsVisible()) then
-					local range = not not InRange(object.unit)
-					object:SetAlpha(range and 1 or 0.2)
-				end
-			end
-
-			ELAPSED = 0
-		else
-			ELAPSED = ELAPSED + elapsed
-		end
-	end)
-end
 
 oUF.TagEvents['[krittshield]'] = 'UNIT_AURA'
 oUF.Tags['[krittshield]'] = function(unit)
@@ -125,3 +104,25 @@ group:SetManyAttributes(
 	'columnAnchorPoint', 'RIGHT'
 )
 group:Show()
+
+--[[ Range/condition fading ]]
+local function InRange(unit)
+	return UnitIsConnected(unit) and not UnitIsDead(unit) and IsSpellInRange('Healing Wave', unit) == 1
+end
+
+local dummy = CreateFrame('Frame')
+dummy.elapsed = 0
+dummy:SetScript('OnUpdate', function(self, elapsed)
+	if(self.elapsed > 0.2) then
+		for object in pairs(objects) do
+			if(object:IsVisible()) then
+				local range = not not InRange(object.unit)
+				object:SetAlpha(range and 1 or 0.2)
+			end
+		end
+
+		self.elapsed = 0
+	else
+		self.elapsed = self.elapsed + elapsed
+	end
+end)
