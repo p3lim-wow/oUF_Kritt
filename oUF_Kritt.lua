@@ -4,24 +4,24 @@ local HealComm = LibStub('LibHealComm-4.0')
 local objects = {}
 local debuffList = {
 	-- Koralon the Flame Watcher
-	[GetSpellInfo(67332)] = true -- Flaming Cinder
+	[67332] = true, -- Flaming Cinder
 
 	-- Beast of Northrend
-	[GetSpellInfo(66331)] = true, -- Impale
-	[GetSpellInfo(67475)] = true, -- Fire Bomb (Gormok)
-	[GetSpellInfo(66406)] = true, -- Snobolled! (Gormok)
-	[GetSpellInfo(67618)] = true, -- Paralytic Toxin (Jormungar)
+	[66331] = true, -- Impale
+	[67475] = true, -- Fire Bomb (Gormok)
+	[66406] = true, -- Snobolled! (Gormok)
+	[67618] = true, -- Paralytic Toxin (Jormungar)
 
 	-- Lord Jaraxxus
-	[GetSpellInfo(66237)] = true, -- Incinerate Flesh
-	[GetSpellInfo(66197)] = true, -- Legion Flame
+	[66237] = true, -- Incinerate Flesh
+	[66197] = true, -- Legion Flame
 
 	-- Twin Val'kyr
-	[GetSpellInfo(66075)] = true, -- Twin Spike
+	[66075] = true, -- Twin Spike
 
 	-- Anub'arak
-	[GetSpellInfo(67700)] = true, -- Penetrating Cold
-	[GetSpellInfo(66012)] = true, -- Freezing Slash
+	[67700] = true, -- Penetrating Cold
+	[66012] = true, -- Freezing Slash
 }
 
 oUF.TagEvents['[krittshield]'] = 'UNIT_AURA'
@@ -75,8 +75,9 @@ local function postCreateAura(self, button, icons)
 	button.overlay:SetTexture()
 end
 
-local function customAuraFilter(icons, unit, icon, name)
-	return debuffList[name]
+local function customAuraFilter(icons, unit, icon, ...)
+	local _, _, _, _, _, _, _, _, _, _, spellid = ...
+	return debuffList[spellid]
 end
 
 local function style(self, unit)
