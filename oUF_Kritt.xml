@@ -10,4 +10,5 @@
 	<Script file='libs\LibHealComm-4.0.lua'/>
 
 	<Script file='oUF_Kritt.lua'/>
+	<Script file='debuffs.lua'/>
 </Ui>

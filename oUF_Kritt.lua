@@ -1,28 +1,8 @@
 ﻿
+local _, ns = ...
 local HealComm = LibStub('LibHealComm-4.0')
 
 local objects = {}
-local debuffList = {
-	-- Koralon the Flame Watcher
-	[67332] = true, -- Flaming Cinder
-
-	-- Beast of Northrend
-	[66331] = true, -- Impale
-	[67475] = true, -- Fire Bomb (Gormok)
-	[66406] = true, -- Snobolled! (Gormok)
-	[67618] = true, -- Paralytic Toxin (Jormungar)
-
-	-- Lord Jaraxxus
-	[66237] = true, -- Incinerate Flesh
-	[66197] = true, -- Legion Flame
-
-	-- Twin Val'kyr
-	[66075] = true, -- Twin Spike
-
-	-- Anub'arak
-	[67700] = true, -- Penetrating Cold
-	[66012] = true, -- Freezing Slash
-}
 
 oUF.TagEvents['[krittshield]'] = 'UNIT_AURA'
 oUF.Tags['[krittshield]'] = function(unit)
@@ -77,7 +57,7 @@ end
 
 local function customAuraFilter(icons, unit, icon, ...)
 	local _, _, _, _, _, _, _, _, _, _, spellid = ...
-	return debuffList[spellid]
+	return ns[spellid]
 end
 
 local function style(self, unit)
