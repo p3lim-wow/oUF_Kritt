@@ -47,17 +47,16 @@ local function updateHealth(self)
 	updateHealComm(self)
 end
 
-local function postCreateAura(self, button, icons)
+local function PostCreateAura(element, button)
 	button:EnableMouse(false)
 	button:SetAlpha(0.75)
 	button.cd:SetReverse()
-	button.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-	button.overlay:SetTexture()
+	button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 end
 
-local function customAuraFilter(icons, unit, icon, ...)
-	local _, _, _, _, _, _, _, _, _, _, spellid = ...
-	return ns[spellid]
+local function CustomFilter(element, ...)
+	local _, _, _, _, _, _, _, _, _, _, _, _, spell = ...
+	return ns[spell]
 end
 
 local function style(self, unit)
@@ -116,14 +115,14 @@ local function style(self, unit)
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
 	self:Tag(riptide, '[krittriptide]')
 
-	self.Debuffs = CreateFrame('Frame', nil, self)
-	self.Debuffs:SetPoint('CENTER')
-	self.Debuffs:SetHeight(16)
-	self.Debuffs:SetWidth(16)
-	self.Debuffs.num = 1
-	self.Debuffs.size = 16
-	self.PostCreateAuraIcon = postCreateAura
-	self.CustomAuraFilter = customAuraFilter
+	local debuffs = CreateFrame('Frame', nil, self)
+	debuffs:SetPoint('CENTER')
+	debuffs:SetHeight(16)
+	debuffs:SetWidth(16)
+	debuffs.num = 1
+	debuffs.size = 16
+	debuffs.PostCreateIcon = PostCreateAura
+	debuffs.CustomFilter = CustomFilter
 
 	self.DebuffHighlightBackdropBorder = true
 	self.DebuffHighlightFilter = true
