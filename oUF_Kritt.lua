@@ -2,8 +2,6 @@
 local addonName, ns = ...
 local HealComm = LibStub('LibHealComm-4.0')
 
-local objects = {}
-
 oUF.TagEvents['kritt:shield'] = 'UNIT_AURA'
 oUF.Tags['kritt:shield'] = function(unit)
 	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Earth Shield')
@@ -36,6 +34,24 @@ oUF.TagEvents['kritt:name'] = 'UNIT_NAME_UPDATE'
 oUF.Tags['kritt:name'] = function(unit, realUnit)
 	local _, class = UnitClass(realUnit or unit)
 	return ('%s%s|r%s'):format(Hex(_COLORS.class[class or 'WARRIOR']), UnitName(realUnit or unit), realUnit and '*' or '')
+end
+
+local function InRange(unit)
+	return UnitIsConnected(unit) and not UnitIsDead(unit) and IsSpellInRange('Healing Wave', unit) == 1
+end
+
+local function RangeUpdate(self, elapsed)
+	if((self.elapsed or 0) > 0.2) then
+		local frame = self:GetParent()
+		if(frame:IsVisible()) then
+			local range = not not InRange(frame.unit)
+			frame:SetAlpha(range and 1 or 0.2)
+		end
+
+		self.elapsed = 0
+	else
+		self.elapsed = (self.elapsed or 0) + elapsed
+	end
 end
 
 local function updateHealComm(self, event)
@@ -136,11 +152,11 @@ local function style(self, unit)
 	debuffs.CustomFilter = CustomFilter
 	self.Debuffs = debuffs
 
+	CreateFrame('Frame', nil, self):SetScript('OnUpdate', RangeUpdate)
+
 	self.DebuffHighlightBackdropBorder = true
 	self.DebuffHighlightFilter = true
 	self.DebuffHighlightAlpha = 0.6
-
-	objects[self] = true
 end
 
 oUF:RegisterStyle('Kritt', style)
@@ -161,28 +177,6 @@ group:SetManyAttributes(
 	'columnSpacing', 5,
 	'columnAnchorPoint', 'RIGHT'
 )
-
---[[ Range/condition fading ]]
-local function InRange(unit)
-	return UnitIsConnected(unit) and not UnitIsDead(unit) and IsSpellInRange('Healing Wave', unit) == 1
-end
-
-local dummy = CreateFrame('Frame')
-dummy.elapsed = 0
-dummy:SetScript('OnUpdate', function(self, elapsed)
-	if(self.elapsed > 0.2) then
-		for object in pairs(objects) do
-			if(object:IsVisible()) then
-				local range = not not InRange(object.unit)
-				object:SetAlpha(range and 1 or 0.2)
-			end
-		end
-
-		self.elapsed = 0
-	else
-		self.elapsed = self.elapsed + elapsed
-	end
-end)
 
 --[[ LibHealComm-4.0 Support ]]
 local function HealComm_Update(...)
