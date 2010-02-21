@@ -26,7 +26,7 @@ oUF.Tags['kritt:health'] = function(unit)
 	elseif(not UnitIsConnected(unit)) then
 		return '|cff333333#|r'
 	elseif(min / max < 0.8) then
-		return ('|cffff8080%01d|r'):format((max - min) / 1e3)
+		return ('|cffff8080%.1f|r'):format((max - min) / 1e3)
 	end
 end
 
