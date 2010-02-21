@@ -134,6 +134,7 @@ local function style(self, unit)
 	debuffs.size = 16
 	debuffs.PostCreateIcon = PostCreateAura
 	debuffs.CustomFilter = CustomFilter
+	self.Debuffs = debuffs
 
 	self.DebuffHighlightBackdropBorder = true
 	self.DebuffHighlightFilter = true
