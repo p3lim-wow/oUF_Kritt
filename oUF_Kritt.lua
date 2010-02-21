@@ -68,10 +68,14 @@ local function updateHealComm(self, event)
 	self.HealComm:SetPoint('RIGHT', self.health, 'LEFT')
 end
 
-local function updateHealth(self)
-	local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
-	self.health:SetPoint('LEFT', 74 * (min / max), 0)
-	self.health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
+local function UpdateHealth(self, event, unit)
+	if(self.unit ~= unit) then return end
+	local health = self.health
+
+	local min, max = UnitHealth(unit), UnitHealthMax(unit)
+	health:SetPoint('LEFT', 74 * (min / max), 0)
+	health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
+
 	updateHealComm(self)
 end
 
@@ -109,8 +113,9 @@ local function style(self, unit)
 	health:SetPoint('TOPRIGHT', -1, -1)
 	health:SetPoint('BOTTOMRIGHT', -1, 1)
 	health:SetPoint('LEFT', 75, 0)
-	self:RegisterEvent('UNIT_HEALTH', updateHealth)
-	self:RegisterEvent('UNIT_HEALTHMAX', updateHealth)
+
+	self:RegisterEvent('UNIT_HEALTH', UpdateHealth)
+	self:RegisterEvent('UNIT_HEALTHMAX', UpdateHealth)
 	self.health = health
 
 	local healcomm = self:CreateTexture(nil, 'ARTWORK')
@@ -162,9 +167,10 @@ end
 oUF:RegisterStyle('Kritt', style)
 oUF:SetActiveStyle('Kritt')
 
-local group = oUF:SpawnHeader(addonName, nil, 'raid,party')
+local group = oUF:SpawnHeader(addonName, nil, 'raid,party,solo')
 group:SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
 group:SetManyAttributes(
+	'showSolo', true,
 	'showPlayer', true,
 	'showParty', true,
 	'showRaid', true,
