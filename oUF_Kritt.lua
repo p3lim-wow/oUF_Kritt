@@ -1,5 +1,5 @@
 ﻿
-local _, ns = ...
+local addonName, ns = ...
 local HealComm = LibStub('LibHealComm-4.0')
 
 local objects = {}
@@ -146,7 +146,7 @@ end
 oUF:RegisterStyle('Kritt', style)
 oUF:SetActiveStyle('Kritt')
 
-local group = oUF:Spawn('header', 'oUF_Kritt')
+local group = oUF:SpawnHeader(addonName, nil, 'raid,party')
 group:SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
 group:SetManyAttributes(
 	'showPlayer', true,
@@ -161,7 +161,6 @@ group:SetManyAttributes(
 	'columnSpacing', 5,
 	'columnAnchorPoint', 'RIGHT'
 )
-group:Show()
 
 --[[ Range/condition fading ]]
 local function InRange(unit)
