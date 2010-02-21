@@ -2,6 +2,7 @@
 local addonName, ns = ...
 local HealComm = LibStub('LibHealComm-4.0')
 
+local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
 local TEXTURE = [=[Interface\ChatFrame\ChatFrameBackground]=]
 
 oUF.TagEvents['kritt:shield'] = 'UNIT_AURA'
@@ -127,26 +128,28 @@ local function style(self, unit)
 	healcomm:SetPoint('RIGHT', health, 'LEFT')
 	self.HealComm = healcomm
 
-	local missing = self:CreateFontString(nil, 'ARTWORK', 'pfont')
+	local missing = self:CreateFontString(nil, 'ARTWORK')
 	missing:SetPoint('RIGHT', -2, 0)
+	missing:SetFont(FONT, 8, 'OUTLINE')
 	missing:SetJustifyH('RIGHT')
 	missing.frequentUpdates = true
 	self:Tag(missing, '[kritt:health]')
 
-	local name = self:CreateFontString(nil, 'ARTWORK', 'pfont')
+	local name = self:CreateFontString(nil, 'ARTWORK')
 	name:SetPoint('LEFT', 4, 0)
 	name:SetPoint('RIGHT', missing, 'LEFT', -2, 0)
+	name:SetFont(FONT, 8, 'OUTLINE')
 	name:SetJustifyH('LEFT')
 	self:Tag(name, '[kritt:leader][kritt:name]')
 
 	local shield = self:CreateFontString(nil, 'ARTWORK')
-	shield:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	shield:SetPoint('TOPLEFT', -3, 16)
+	shield:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	self:Tag(shield, '[kritt:shield]')
 
 	local riptide = self:CreateFontString(nil, 'ARTWORK')
-	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
+	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	self:Tag(riptide, '[kritt:riptide]')
 
 	local debuffs = CreateFrame('Frame', nil, self)
