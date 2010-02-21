@@ -78,7 +78,6 @@ local function style(self, unit)
 
 	self:SetAttribute('initial-height', 23)
 	self:SetAttribute('initial-width', 75)
-	self:SetAttribute('toggleForVehicle', true)
 
 	self:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], edgeFile = [=[Interface\ChatFrame\ChatFrameBackground]=], edgeSize = 1})
 	self:SetBackdropColor(0, 0, 0, 0.5)
