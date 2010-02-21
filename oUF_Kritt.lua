@@ -2,6 +2,8 @@
 local addonName, ns = ...
 local HealComm = LibStub('LibHealComm-4.0')
 
+local TEXTURE = [=[Interface\ChatFrame\ChatFrameBackground]=]
+
 oUF.TagEvents['kritt:shield'] = 'UNIT_AURA'
 oUF.Tags['kritt:shield'] = function(unit)
 	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Earth Shield')
@@ -99,7 +101,7 @@ local function style(self, unit)
 	self:SetAttribute('initial-height', 23)
 	self:SetAttribute('initial-width', 75)
 
-	self:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], edgeFile = [=[Interface\ChatFrame\ChatFrameBackground]=], edgeSize = 1})
+	self:SetBackdrop({bgFile =	TEXTURE, edgeFile = TEXTURE, edgeSize = 1})
 	self:SetBackdropColor(0, 0, 0, 0.5)
 	self:SetBackdropBorderColor(0, 0, 0, 0.6)
 
