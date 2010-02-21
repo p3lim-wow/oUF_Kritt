@@ -4,26 +4,38 @@ local HealComm = LibStub('LibHealComm-4.0')
 
 local objects = {}
 
-oUF.TagEvents['[krittshield]'] = 'UNIT_AURA'
-oUF.Tags['[krittshield]'] = function(unit)
+oUF.TagEvents['kritt:shield'] = 'UNIT_AURA'
+oUF.Tags['kritt:shield'] = function(unit)
 	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Earth Shield')
 	return caster == 'player' and '|cff00ff00.|r'
 end
 
-oUF.TagEvents['[krittriptide]'] = 'UNIT_AURA'
-oUF.Tags['[krittriptide]'] = function(unit)
+oUF.TagEvents['kritt:riptide'] = 'UNIT_AURA'
+oUF.Tags['kritt:riptide'] = function(unit)
 	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Riptide')
 	return caster == 'player' and '|cff0090ff.|r'
 end
 
-oUF.TagEvents['[krittleader]'] = 'PARTY_LEADER_CHANGED'
-oUF.Tags['[krittleader]'] = function(unit)
+oUF.TagEvents['kritt:leader'] = 'PARTY_LEADER_CHANGED'
+oUF.Tags['kritt:leader'] = function(unit)
 	return UnitIsPartyLeader(unit) and '|cffffff00!|r'
 end
 
-oUF.Tags['[kritthp]'] = function(unit)
+oUF.Tags['kritt:health'] = function(unit)
 	local min, max = UnitHealth(unit), UnitHealthMax(unit)
-	return UnitIsDeadOrGhost(unit) and '|cffff0000X|r' or not UnitIsConnected(unit) and '|cff333333#|r' or min / max < 0.8 and string.format('|cffff8080%.1f|r', (max - min) / 1e3)
+	if(UnitIsDeadOrGhost(unit)) then
+		return '|cffff0000X|r'
+	elseif(not UnitIsConnected(unit)) then
+		return '|cff333333#|r'
+	elseif(min / max < 0.8) then
+		return ('|cffff8080%01d|r'):format((max - min) / 1e3)
+	end
+end
+
+oUF.TagEvents['kritt:name'] = 'UNIT_NAME_UPDATE'
+oUF.Tags['kritt:name'] = function(unit, realUnit)
+	local _, class = UnitClass(realUnit or unit)
+	return ('%s%s|r%s'):format(Hex(_COLORS.class[class or 'WARRIOR']), UnitName(realUnit or unit), realUnit and '*' or '')
 end
 
 local function updateHealComm(self, event)
@@ -97,23 +109,23 @@ local function style(self, unit)
 	missing:SetPoint('RIGHT', -2, 0)
 	missing:SetJustifyH('RIGHT')
 	missing.frequentUpdates = true
-	self:Tag(missing, '[kritthp]')
+	self:Tag(missing, '[kritt:health]')
 
 	local name = self:CreateFontString(nil, 'ARTWORK', 'pfont')
 	name:SetPoint('LEFT', 4, 0)
 	name:SetPoint('RIGHT', missing, 'LEFT', -2, 0)
 	name:SetJustifyH('LEFT')
-	self:Tag(name, '[krittleader][raidcolor][name]')
+	self:Tag(name, '[kritt:leader][kritt:name]')
 
 	local shield = self:CreateFontString(nil, 'ARTWORK')
 	shield:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	shield:SetPoint('TOPLEFT', -3, 16)
-	self:Tag(shield, '[krittshield]')
+	self:Tag(shield, '[kritt:shield]')
 
 	local riptide = self:CreateFontString(nil, 'ARTWORK')
 	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
-	self:Tag(riptide, '[krittriptide]')
+	self:Tag(riptide, '[kritt:riptide]')
 
 	local debuffs = CreateFrame('Frame', nil, self)
 	debuffs:SetPoint('CENTER')
