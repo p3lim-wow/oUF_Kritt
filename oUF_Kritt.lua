@@ -37,7 +37,8 @@ end
 oUF.TagEvents['kritt:name'] = 'UNIT_NAME_UPDATE'
 oUF.Tags['kritt:name'] = function(unit, realUnit)
 	local _, class = UnitClass(realUnit or unit)
-	return ('%s%s|r%s'):format(Hex(_COLORS.class[class or 'WARRIOR']), UnitName(realUnit or unit), realUnit and '*' or '')
+	local colors = _COLORS.class
+	return ('%s%s|r%s'):format(Hex(colors[class] or colors['WARRIOR']), UnitName(realUnit or unit), realUnit and '*' or '')
 end
 
 local function InRange(unit)
