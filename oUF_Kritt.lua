@@ -175,7 +175,7 @@ end
 oUF:RegisterStyle('Kritt', style)
 oUF:SetActiveStyle('Kritt')
 
-local group = oUF:SpawnHeader(addonName, nil, 'raid,party,solo')
+local group = oUF:SpawnHeader(addonName, nil, 'raid,party')
 group:SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
 group:SetManyAttributes(
 	'showSolo', true,
