@@ -8,6 +8,7 @@
 
 libs\LibStub.lua
 libs\CallbackHandler-1.0.lua
+libs\ChatThrottleLib.lua
 libs\LibHealComm-4.0.lua
 
 oUF_Kritt.lua

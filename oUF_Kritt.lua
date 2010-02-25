@@ -1,5 +1,6 @@
 ﻿
 local addonName, ns = ...
+
 local HealComm = LibStub('LibHealComm-4.0')
 
 local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
@@ -57,18 +58,20 @@ local function RangeUpdate(self, elapsed)
 	end
 end
 
-local function updateHealComm(self, event)
-	if(not UnitIsDead(self.unit) and UnitIsConnected(self.unit)) then
-		local guid = UnitGUID(self.unit)
-		local incoming = HealComm:GetHealAmount(guid, HealComm.ALL_HEALS, GetTime() + 5)
-		if(incoming) then
-			local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
-			self.HealComm:SetPoint('RIGHT', self.health, 'LEFT', (73 * (math.min(incoming * HealComm:GetHealModifier(guid), max - min) / max)) * (min / max), 0)
-			return
-		end
-	end
+local function UpdateHealComm(self, event)
+	if(UnitIsDeadOrGhost(self.unit) or not UnitIsConnected(self.unit)) then return end
 
-	self.HealComm:SetPoint('RIGHT', self.health, 'LEFT')
+	local guid = UnitGUID(self.unit)
+	local incoming = HealComm:GetHealAmount(guid, HealComm.ALL_HEALS, GetTime() + 3)
+
+	if(incoming) then
+		local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
+		local offset = 73 * (math.min(incoming * HealComm:GetHealModifier(guid), max - min) / max) * (min / max)
+
+		self.HealComm:SetPoint('RIGHT', self.health, 'LEFT', offset, 0)
+	else
+		self.HealComm:SetPoint('RIGHT', self.health, 'LEFT')
+	end
 end
 
 local function UpdateHealth(self, event, unit)
@@ -79,7 +82,7 @@ local function UpdateHealth(self, event, unit)
 	health:SetPoint('LEFT', 74 * (min / max), 0)
 	health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
 
-	updateHealComm(self)
+	UpdateHealComm(self)
 end
 
 local function PostCreateAura(element, button)
@@ -193,8 +196,10 @@ group:SetManyAttributes(
 local function HealComm_Update(...)
 	for index = 1, select('#', ...) do
 		for _, frame in pairs(oUF.objects) do
-			if(frame.unit and frame.HealComm and UnitGUID(frame.unit) == select(index, ...)) then
-				updateHealComm(frame)
+			if(frame.unit and frame.HealComm) then
+				if(UnitGUID(frame.unit) == select(index, ...)) then
+					UpdateHealComm(frame)
+				end
 			end
 		end
 	end
