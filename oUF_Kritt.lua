@@ -1,5 +1,5 @@
 ﻿
-local addonName, ns = ...
+local _, ns = ...
 
 local HealComm = LibStub('LibHealComm-4.0')
 
@@ -176,9 +176,7 @@ end
 oUF:RegisterStyle('Kritt', style)
 oUF:SetActiveStyle('Kritt')
 
-local group = oUF:SpawnHeader(addonName, nil, 'raid,party')
-group:SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
-group:SetManyAttributes(
+local group = oUF:SpawnHeader(nil, nil, 'raid,party',
 	'showPlayer', true,
 	'showParty', true,
 	'showRaid', true,
@@ -191,6 +189,7 @@ group:SetManyAttributes(
 	'columnSpacing', 5,
 	'columnAnchorPoint', 'RIGHT'
 )
+group:SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
 
 local PreUpdateHealComm
 do
