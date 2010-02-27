@@ -67,7 +67,7 @@ local function UpdateHealComm(self, event)
 
 	if(incoming) then
 		local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
-		local offset = 73 * (math.min(incoming * HealComm:GetHealModifier(guid), max - min) / max) * (min / max)
+		local offset = (math.min(incoming * HealComm:GetHealModifier(guid), max - min) / max) * 73
 
 		self.HealComm:SetPoint('RIGHT', self.health, 'LEFT', offset, 0)
 	else
@@ -193,11 +193,14 @@ group:SetManyAttributes(
 	'columnAnchorPoint', 'RIGHT'
 )
 
---[[ LibHealComm-4.0 Support ]]
-local function HealComm_Update(...)
-	for index = 1, select('#', ...) do
-		for _, frame in pairs(oUF.objects) do
-			if(frame.unit and frame.HealComm) then
+local PreUpdateHealComm
+do
+	local children
+	function PreUpdateHealComm(...)
+		children = {group:GetChildren()}
+
+		for index = 1, select('#', ...) do
+			for _, frame in pairs(children) do
 				if(UnitGUID(frame.unit) == select(index, ...)) then
 					UpdateHealComm(frame)
 				end
@@ -206,18 +209,13 @@ local function HealComm_Update(...)
 	end
 end
 
-local function HealComm_Heal(event, caster, spell, type, _, ...)
-	HealComm_Update(...)
+local function InitHealComm(event, guid, spell, type, time, ...)
+	PreUpdateHealComm(...)
 end
 
-local function HealComm_Modified(event, guid)
-	HealComm_Update(guid)
-end
-
-HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealStarted', HealComm_Heal)
-HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealUpdated', HealComm_Heal)
-HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealDelayed', HealComm_Heal)
-HealComm.RegisterCallback('oUF_Kritt', 'HealComm_HealStopped', HealComm_Heal)
-HealComm.RegisterCallback('oUF_Kritt', 'HealComm_ModifierChanged', HealComm_Modified)
-HealComm.RegisterCallback('oUF_Kritt', 'HealComm_GUIDDisappeared', HealComm_Modified)
-
+HealComm.RegisterCallback(group, 'HealComm_HealStarted', InitHealComm)
+HealComm.RegisterCallback(group, 'HealComm_HealUpdated', InitHealComm)
+HealComm.RegisterCallback(group, 'HealComm_HealDelayed', InitHealComm)
+HealComm.RegisterCallback(group, 'HealComm_HealStopped', InitHealComm)
+HealComm.RegisterCallback(group, 'HealComm_ModifierChanged', function(event, ...) PreUpdateHealComm(...) end)
+HealComm.RegisterCallback(group, 'HealComm_GUIDDisappeared', function(event, ...) PreUpdateHealComm(...) end)
