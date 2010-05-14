@@ -1,9 +1,4 @@
-﻿
-local _, ns = ...
-
-local HealComm = LibStub('LibHealComm-4.0')
-
-local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
+﻿local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
 local TEXTURE = [=[Interface\ChatFrame\ChatFrameBackground]=]
 
 oUF.TagEvents['kritt:shield'] = 'UNIT_AURA'
@@ -59,22 +54,6 @@ local function RangeUpdate(self, elapsed)
 	end
 end
 
-local function UpdateHealComm(self, event)
-	if(UnitIsDeadOrGhost(self.unit) or not UnitIsConnected(self.unit)) then return end
-
-	local guid = UnitGUID(self.unit)
-	local incoming = HealComm:GetHealAmount(guid, HealComm.ALL_HEALS, GetTime() + 3)
-
-	if(incoming) then
-		local min, max = UnitHealth(self.unit), UnitHealthMax(self.unit)
-		local offset = (math.min(incoming * HealComm:GetHealModifier(guid), max - min) / max) * 73
-
-		self.HealComm:SetPoint('RIGHT', self.health, 'LEFT', offset, 0)
-	else
-		self.HealComm:SetPoint('RIGHT', self.health, 'LEFT')
-	end
-end
-
 local function UpdateHealth(self, event, unit)
 	if(self.unit ~= unit) then return end
 	local health = self.health
@@ -82,20 +61,6 @@ local function UpdateHealth(self, event, unit)
 	local min, max = UnitHealth(unit), UnitHealthMax(unit)
 	health:SetPoint('LEFT', 74 * (min / max), 0)
 	health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
-
-	UpdateHealComm(self)
-end
-
-local function PostCreateAura(element, button)
-	button:EnableMouse(false)
-	button:SetAlpha(0.75)
-	button.cd:SetReverse()
-	button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-end
-
-local function CustomFilter(element, ...)
-	local _, _, _, _, _, _, _, _, _, _, _, _, spell = ...
-	return ns[spell]
 end
 
 local function style(self, unit)
@@ -156,21 +121,7 @@ local function style(self, unit)
 	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	self:Tag(riptide, '[kritt:riptide]')
 
-	local debuffs = CreateFrame('Frame', nil, self)
-	debuffs:SetPoint('CENTER')
-	debuffs:SetHeight(16)
-	debuffs:SetWidth(16)
-	debuffs.num = 1
-	debuffs.size = 16
-	debuffs.PostCreateIcon = PostCreateAura
-	debuffs.CustomFilter = CustomFilter
-	self.Debuffs = debuffs
-
 	CreateFrame('Frame', nil, self):SetScript('OnUpdate', RangeUpdate)
-
-	self.DebuffHighlightBackdropBorder = true
-	self.DebuffHighlightFilter = true
-	self.DebuffHighlightAlpha = 0.6
 end
 
 oUF:RegisterStyle('Kritt', style)
@@ -190,30 +141,3 @@ local group = oUF:SpawnHeader(nil, nil, 'raid,party',
 	'columnAnchorPoint', 'RIGHT'
 )
 group:SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
-
-local PreUpdateHealComm
-do
-	local children
-	function PreUpdateHealComm(...)
-		children = {group:GetChildren()}
-
-		for index = 1, select('#', ...) do
-			for _, frame in pairs(children) do
-				if(UnitGUID(frame.unit) == select(index, ...)) then
-					UpdateHealComm(frame)
-				end
-			end
-		end
-	end
-end
-
-local function InitHealComm(event, guid, spell, type, time, ...)
-	PreUpdateHealComm(...)
-end
-
-HealComm.RegisterCallback(group, 'HealComm_HealStarted', InitHealComm)
-HealComm.RegisterCallback(group, 'HealComm_HealUpdated', InitHealComm)
-HealComm.RegisterCallback(group, 'HealComm_HealDelayed', InitHealComm)
-HealComm.RegisterCallback(group, 'HealComm_HealStopped', InitHealComm)
-HealComm.RegisterCallback(group, 'HealComm_ModifierChanged', function(event, ...) PreUpdateHealComm(...) end)
-HealComm.RegisterCallback(group, 'HealComm_GUIDDisappeared', function(event, ...) PreUpdateHealComm(...) end)
