@@ -125,19 +125,19 @@ local function style(self, unit)
 end
 
 oUF:RegisterStyle('Kritt', style)
-oUF:SetActiveStyle('Kritt')
-
-local group = oUF:SpawnHeader(nil, nil, 'raid,party',
-	'showPlayer', true,
-	'showParty', true,
-	'showRaid', true,
-	'yOffset', -5,
-	'point', 'TOP',
-	'groupingOrder', '1,2,3,4,5',
-	'groupBy', 'GROUP',
-	'maxColumns', 5,
-	'unitsPerColumn', 5,
-	'columnSpacing', 5,
-	'columnAnchorPoint', 'RIGHT'
-)
-group:SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
+oUF:Factory(function(self)
+	self:SetActiveStyle('Kritt')
+	self:SpawnHeader(nil, nil, 'raid,party',
+		'showPlayer', true,
+		'showParty', true,
+		'showRaid', true,
+		'yOffset', -5,
+		'point', 'TOP',
+		'groupingOrder', '1,2,3,4,5',
+		'groupBy', 'GROUP',
+		'maxColumns', 5,
+		'unitsPerColumn', 5,
+		'columnSpacing', 5,
+		'columnAnchorPoint', 'RIGHT'
+	):SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
+end)
