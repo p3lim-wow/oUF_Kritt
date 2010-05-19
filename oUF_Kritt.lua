@@ -72,6 +72,7 @@ local function style(self, unit)
 
 	self:RegisterEvent('UNIT_HEALTH', UpdateHealth)
 	self:RegisterEvent('UNIT_HEALTHMAX', UpdateHealth)
+	table.insert(self.__elements, UpdateHealth)
 	self.health = health
 
 	local healcomm = self:CreateTexture(nil, 'ARTWORK')
