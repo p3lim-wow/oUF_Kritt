@@ -106,6 +106,7 @@ local function style(self, unit)
 	self:Tag(riptide, '[kritt:riptide]')
 
 	modules.Range(self)
+	modules.Dispel(self)
 end
 
 oUF:RegisterStyle('Kritt', style)

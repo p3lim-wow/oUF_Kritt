@@ -6,5 +6,6 @@
 ## RequiredDeps: oUF
 
 modules\range.lua
+modules\dispel.lua
 
 oUF_Kritt.lua
