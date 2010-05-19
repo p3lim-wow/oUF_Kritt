@@ -5,4 +5,6 @@
 ## Notes: Clean oUF raid layout designed around a restoration Shaman
 ## RequiredDeps: oUF
 
+modules\range.lua
+
 oUF_Kritt.lua

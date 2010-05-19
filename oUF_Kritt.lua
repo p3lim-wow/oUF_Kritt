@@ -1,4 +1,6 @@
-﻿local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
+﻿local _, modules = ...
+
+local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
 local TEXTURE = [=[Interface\ChatFrame\ChatFrameBackground]=]
 
 oUF.TagEvents['kritt:shield'] = 'UNIT_AURA'
@@ -102,6 +104,8 @@ local function style(self, unit)
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
 	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	self:Tag(riptide, '[kritt:riptide]')
+
+	modules.Range(self)
 end
 
 oUF:RegisterStyle('Kritt', style)
