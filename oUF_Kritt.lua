@@ -36,24 +36,6 @@ oUF.Tags['kritt:name'] = function(unit, realUnit)
 	return ('%s%s|r%s'):format(Hex(colors[class] or colors['WARRIOR']), UnitName(realUnit or unit), realUnit and '*' or '')
 end
 
-local function InRange(unit)
-	return UnitIsConnected(unit) and not UnitIsDead(unit) and IsSpellInRange('Healing Wave', unit) == 1
-end
-
-local function RangeUpdate(self, elapsed)
-	if((self.elapsed or 0) > 0.2) then
-		local frame = self:GetParent()
-		if(frame:IsVisible()) then
-			local range = not not InRange(frame.unit)
-			frame:SetAlpha(range and 1 or 0.2)
-		end
-
-		self.elapsed = 0
-	else
-		self.elapsed = (self.elapsed or 0) + elapsed
-	end
-end
-
 local function UpdateHealth(self, event, unit)
 	if(self.unit ~= unit) then return end
 	local health = self.health
@@ -120,8 +102,6 @@ local function style(self, unit)
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
 	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	self:Tag(riptide, '[kritt:riptide]')
-
-	CreateFrame('Frame', nil, self):SetScript('OnUpdate', RangeUpdate)
 end
 
 oUF:RegisterStyle('Kritt', style)
