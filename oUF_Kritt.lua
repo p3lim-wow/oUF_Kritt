@@ -9,6 +9,14 @@ oUF.Tags['kritt:shield'] = function(unit)
 	return caster == 'player' and '|cff00ff00.|r'
 end
 
+oUF.TagEvents['kritt:threat'] = 'UNIT_THREAT_LIST_UPDATE'
+oUF.Tags['kritt:threat'] = function(unit)
+	local status = UnitThreatSituation(unit)
+	if(status and status > 0) then
+		return ('%s.|r'):format(Hex(GetThreatStatusColor(status)))
+	end
+end	
+
 oUF.TagEvents['kritt:riptide'] = 'UNIT_AURA'
 oUF.Tags['kritt:riptide'] = function(unit)
 	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Riptide')
@@ -105,6 +113,11 @@ local function style(self, unit)
 	riptide:SetPoint('BOTTOMLEFT', -3, -2)
 	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	self:Tag(riptide, '[kritt:riptide]')
+
+	local threat = self:CreateFontString(nil, 'ARTWORK')
+	threat:SetPoint('TOPRIGHT', 1, 16)
+	threat:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
+	self:Tag(threat, '[kritt:threat]')
 
 	modules.Range(self)
 	modules.Dispel(self)
