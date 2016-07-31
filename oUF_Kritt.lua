@@ -240,6 +240,7 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
 	self.Threat = Threat
 
+	self.DebuffHighlightBorder = true
 	self.Range = {
 		insideAlpha = 1,
 		outsideAlpha = 1/5

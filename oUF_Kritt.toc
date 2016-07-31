@@ -8,6 +8,7 @@
 embeds\oUF\oUF.xml
 
 
+elements\DebuffHighlight.lua
 elements\Tags.lua
 
 oUF_Kritt.lua
