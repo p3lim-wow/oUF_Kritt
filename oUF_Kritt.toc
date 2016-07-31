@@ -10,4 +10,6 @@ embeds\oUF\oUF.xml
 modules\range.lua
 modules\dispel.lua
 
+elements\Tags.lua
+
 oUF_Kritt.lua

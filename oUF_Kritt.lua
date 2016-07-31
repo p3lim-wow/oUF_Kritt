@@ -4,49 +4,6 @@ local oUF = ns.oUF
 local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
 local TEXTURE = [=[Interface\ChatFrame\ChatFrameBackground]=]
 
-oUF.TagEvents['kritt:shield'] = 'UNIT_AURA'
-oUF.Tags['kritt:shield'] = function(unit)
-	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Earth Shield')
-	return caster == 'player' and '|cff00ff00.|r'
-end
-
-oUF.TagEvents['kritt:threat'] = 'UNIT_THREAT_LIST_UPDATE'
-oUF.Tags['kritt:threat'] = function(unit)
-	local status = UnitThreatSituation(unit)
-	if(status and status > 0) then
-		return ('%s.|r'):format(Hex(GetThreatStatusColor(status)))
-	end
-end	
-
-oUF.TagEvents['kritt:riptide'] = 'UNIT_AURA'
-oUF.Tags['kritt:riptide'] = function(unit)
-	local _, _, _, _, _, _, _, caster = UnitAura(unit, 'Riptide')
-	return caster == 'player' and '|cff0090ff.|r'
-end
-
-oUF.TagEvents['kritt:leader'] = 'PARTY_LEADER_CHANGED'
-oUF.Tags['kritt:leader'] = function(unit)
-	return UnitIsPartyLeader(unit) and '|cffffff00!|r'
-end
-
-oUF.Tags['kritt:health'] = function(unit)
-	local min, max = UnitHealth(unit), UnitHealthMax(unit)
-	if(UnitIsDeadOrGhost(unit)) then
-		return '|cffff0000X|r'
-	elseif(not UnitIsConnected(unit)) then
-		return '|cff333333#|r'
-	elseif(min / max < 0.8) then
-		return ('|cffff8080%.1f|r'):format((max - min) / 1e3)
-	end
-end
-
-oUF.TagEvents['kritt:name'] = 'UNIT_NAME_UPDATE'
-oUF.Tags['kritt:name'] = function(unit, realUnit)
-	local _, class = UnitClass(realUnit or unit)
-	local colors = _COLORS.class
-	return ('%s%s|r%s'):format(Hex(colors[class] or colors['WARRIOR']), UnitName(realUnit or unit), realUnit and '*' or '')
-end
-
 local function UpdateHealth(self, event, unit)
 	if(self.unit ~= unit) then return end
 	local health = self.health
