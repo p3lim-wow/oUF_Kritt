@@ -84,6 +84,11 @@ local function style(self, unit)
 	local Threat = CreateIndicator(self, 4)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
 	self.Threat = Threat
+
+	self.Range = {
+		insideAlpha = 1,
+		outsideAlpha = 1/5
+	}
 end
 
 oUF:RegisterStyle('Kritt', style)
