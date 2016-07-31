@@ -280,7 +280,7 @@ Handler:SetScript('OnEvent', function()
 		return
 	end
 
-	if(GetSpecializationRole(GetSpecialization()) == 'HEALER') then
+	if(GetSpecializationRole(GetSpecialization() or 0) == 'HEALER') then
 		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', visibilityConditions)
 	else
 		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', 'hide')
