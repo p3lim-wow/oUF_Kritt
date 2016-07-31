@@ -240,6 +240,11 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
 	self.Threat = Threat
 
+	local Resurrect = self:CreateTexture(nil, 'OVERLAY')
+	Resurrect:SetPoint('RIGHT', -5, -1)
+	Resurrect:SetSize(20, 20)
+	self.Resurrect = Resurrect
+
 	self.DebuffHighlightBorder = true
 	self.Range = {
 		insideAlpha = 1,

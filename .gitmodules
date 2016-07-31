@@ -1,3 +1,12 @@
 [submodule "oUF"]
 	path = embeds/oUF
 	url = git://github.com/p3lim-wow/oUF
+[submodule "LibStub"]
+	path = embeds/LibStub
+	url = git://github.com/wowace-mirror/LibStub
+[submodule "CallbackHandler-1.0"]
+	path = embeds/CallbackHandler-1.0
+	url = git://github.com/wowace-mirror/CallbackHandler-1.0
+[submodule "LibResInfo-1.0"]
+	path = embeds/LibResInfo-1.0
+	url = git://github.com/Phanx/LibResInfo
