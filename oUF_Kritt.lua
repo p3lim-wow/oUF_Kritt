@@ -1,4 +1,5 @@
-﻿local _, modules = ...
+﻿local _, ns = ...
+local oUF = ns.oUF
 
 local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
 local TEXTURE = [=[Interface\ChatFrame\ChatFrameBackground]=]
@@ -119,8 +120,8 @@ local function style(self, unit)
 	threat:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
 	self:Tag(threat, '[kritt:threat]')
 
-	modules.Range(self)
-	modules.Dispel(self)
+	ns.Range(self)
+	ns.Dispel(self)
 end
 
 oUF:RegisterStyle('Kritt', style)
