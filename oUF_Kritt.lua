@@ -23,6 +23,27 @@ local function UpdateHealth(self, event, unit)
 	element:SetPoint('LEFT', (width - 1) * percentage, 0)
 end
 
+local function CreateIndicator(self, size)
+	local Indicator = self:CreateTexture(nil, 'OVERLAY')
+	Indicator:SetSize(size, size)
+	Indicator:SetTexture(TEXTURE)
+
+	local Background = self:CreateTexture()
+	Background:SetPoint('CENTER', Indicator)
+	Background:SetSize(size + 2, size + 2)
+	Background:SetColorTexture(0, 0, 0)
+
+	hooksecurefunc(Indicator, 'Show', function()
+		Background:Show()
+	end)
+
+	hooksecurefunc(Indicator, 'Hide', function()
+		Background:Hide()
+	end)
+
+	return Indicator
+end
+
 local function style(self, unit)
 	self:RegisterForClicks('AnyUp')
 	self:SetScript('OnEnter', UnitFrame_OnEnter)
@@ -59,6 +80,10 @@ local function style(self, unit)
 	RaidIcon:SetPoint('TOP', 0, 4)
 	RaidIcon:SetSize(12, 12)
 	self.RaidIcon = RaidIcon
+
+	local Threat = CreateIndicator(self, 4)
+	Threat:SetPoint('TOPRIGHT', -3, -3)
+	self.Threat = Threat
 end
 
 oUF:RegisterStyle('Kritt', style)
