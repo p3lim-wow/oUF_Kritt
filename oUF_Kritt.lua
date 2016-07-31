@@ -154,7 +154,7 @@ local function CreateIndicator(self, size)
 	return Indicator
 end
 
-local function style(self, unit)
+oUF:RegisterStyle('Kritt', function(self, unit)
 	self:RegisterForClicks('AnyUp')
 	self:SetScript('OnEnter', UnitFrame_OnEnter)
 	self:SetScript('OnLeave', UnitFrame_OnLeave)
@@ -244,9 +244,8 @@ local function style(self, unit)
 		insideAlpha = 1,
 		outsideAlpha = 1/5
 	}
-end
+end)
 
-oUF:RegisterStyle('Kritt', style)
 oUF:SetActiveStyle('Kritt')
 oUF:SpawnHeader(nil, nil, nil,
 	'showPlayer', true,
