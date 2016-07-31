@@ -13,9 +13,9 @@ for tag, method in next, {
 	end,
 	health = function(unit)
 		if(UnitIsDeadOrGhost(unit)) then
-			return '|cffff0000X|r'
+			return '|cffff0000DEAD|r'
 		elseif(not UnitIsConnected(unit)) then
-			return '|cff333333#|r'
+			return '|cff666666OFF|r'
 		else
 			local cur, max = UnitHealth(unit), UnitHealthMax(unit)
 			if(cur / max < 0.8) then
