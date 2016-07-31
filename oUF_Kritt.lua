@@ -247,23 +247,37 @@ local function style(self, unit)
 end
 
 oUF:RegisterStyle('Kritt', style)
-oUF:Factory(function(self)
-	self:SetActiveStyle('Kritt')
-	self:SpawnHeader(nil, nil, 'raid,party',
-		'showPlayer', true,
-		'showParty', true,
-		'showRaid', true,
-		'yOffset', -5,
-		'point', 'TOP',
-		'groupBy', 'ASSIGNEDROLE',
-		'groupingOrder', 'TANK,HEALER,DAMAGER',
-		'maxColumns', 5,
-		'unitsPerColumn', 5,
-		'columnSpacing', 5,
-		'columnAnchorPoint', 'RIGHT',
-		'oUF-initialConfigFunction', [[
-			self:SetWidth(90)
-			self:SetHeight(35)
-		]]
-	):SetPoint('RIGHT', UIParent, 'LEFT', 776, -100)
+oUF:SetActiveStyle('Kritt')
+oUF:SpawnHeader(nil, nil, nil,
+	'showPlayer', true,
+	'showParty', true,
+	'showRaid', true,
+	'yOffset', -5,
+	'point', 'TOP',
+	'groupBy', 'ASSIGNEDROLE',
+	'groupingOrder', 'TANK,HEALER,DAMAGER',
+	'maxColumns', 5,
+	'unitsPerColumn', 5,
+	'columnSpacing', 5,
+	'columnAnchorPoint', 'RIGHT',
+	'oUF-initialConfigFunction', [[
+		self:SetWidth(90)
+		self:SetHeight(35)
+	]]
+):SetPoint('RIGHT', UIParent, 'LEFT', 776, -100)
+
+local visibilityConditions = '[group:raid,nogroup:party] show; [group:party] show; hide'
+
+local Handler = CreateFrame('Frame')
+Handler:RegisterEvent('PLAYER_TALENT_UPDATE')
+Handler:SetScript('OnEvent', function()
+	if(InCombatLockdown()) then
+		return
+	end
+
+	if(GetSpecializationRole(GetSpecialization()) == 'HEALER') then
+		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', visibilityConditions)
+	else
+		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', 'hide')
+	end
 end)
