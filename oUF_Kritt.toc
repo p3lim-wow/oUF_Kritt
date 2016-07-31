@@ -2,13 +2,11 @@
 ## Author: p3lim
 ## Version: Alpha
 ## Title: oUF Kritt
-## Notes: Clean oUF raid layout designed around a restoration Shaman
+## Notes: Healer-oriented raid frames
 ## X-oUF: oUF_Kritt
 
 embeds\oUF\oUF.xml
 
-modules\range.lua
-modules\dispel.lua
 
 elements\Tags.lua
 

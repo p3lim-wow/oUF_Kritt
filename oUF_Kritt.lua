@@ -1,16 +1,26 @@
 ﻿local _, ns = ...
 local oUF = ns.oUF
 
-local FONT = [=[Interface\AddOns\oUF_Kritt\semplice.ttf]=]
-local TEXTURE = [=[Interface\ChatFrame\ChatFrameBackground]=]
+local FONT = [[Interface\AddOns\oUF_Kritt\semplice.ttf]]
+local TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
+local BACKDROP = {
+	bgFile = TEXTURE, edgeFile = TEXTURE, edgeSize = 1
+}
 
 local function UpdateHealth(self, event, unit)
-	if(self.unit ~= unit) then return end
-	local health = self.health
+	if(self.unit ~= unit) then
+		return
+	end
 
-	local min, max = UnitHealth(unit), UnitHealthMax(unit)
-	health:SetPoint('LEFT', 74 * (min / max), 0)
-	health:SetVertexColor(self.ColorGradient(min / max, unpack(self.colors.smooth)))
+	local cur = UnitHealth(unit)
+	local max = UnitHealthMax(unit)
+	local percentage = cur / max
+
+	local element = self.Health
+	element:SetVertexColor(self.ColorGradient(cur, max, unpack(self.colors.smooth)))
+
+	local width = self:GetWidth()
+	element:SetPoint('LEFT', (width - 1) * percentage, 0)
 end
 
 local function style(self, unit)
@@ -18,64 +28,32 @@ local function style(self, unit)
 	self:SetScript('OnEnter', UnitFrame_OnEnter)
 	self:SetScript('OnLeave', UnitFrame_OnLeave)
 
-	self:SetBackdrop({bgFile =	TEXTURE, edgeFile = TEXTURE, edgeSize = 1})
-	self:SetBackdropColor(0, 0, 0, 0.5)
-	self:SetBackdropBorderColor(0, 0, 0, 0.6)
+	self:SetBackdrop(BACKDROP)
+	self:SetBackdropColor(0, 0, 0, 1/2)
+	self:SetBackdropBorderColor(0, 0, 0)
 
-	local bg = self:CreateTexture(nil, 'BACKGROUND')
-	bg:SetPoint('TOPLEFT', 1, -1)
-	bg:SetPoint('BOTTOMRIGHT', -1, 1)
-	bg:SetTexture(1, 1, 1, 0.05)
+	local Health = self:CreateTexture(nil, 'BORDER')
+	Health:SetPoint('TOPRIGHT', -1, -1)
+	Health:SetPoint('BOTTOMRIGHT', -1, 1)
+	Health:SetPoint('LEFT', self:GetWidth(), 0)
+	Health:SetColorTexture(2/3, 2/3, 2/3)
+	Health.Override = UpdateHealth
+	self.Health = Health
 
-	local health = self:CreateTexture(nil, 'BORDER')
-	health:SetTexture(0.6, 0.6, 0.6)
-	health:SetPoint('TOPRIGHT', -1, -1)
-	health:SetPoint('BOTTOMRIGHT', -1, 1)
-	health:SetPoint('LEFT', 75, 0)
+	local HealthValue = self:CreateFontString()
+	HealthValue:SetPoint('RIGHT', -2, 0)
+	HealthValue:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+	HealthValue:SetJustifyH('RIGHT')
+	HealthValue:SetWordWrap(false)
+	self:Tag(HealthValue, '[kritt:health]')
 
-	self:RegisterEvent('UNIT_HEALTH', UpdateHealth)
-	self:RegisterEvent('UNIT_HEALTHMAX', UpdateHealth)
-	table.insert(self.__elements, UpdateHealth)
-	self.health = health
-
-	local healcomm = self:CreateTexture(nil, 'ARTWORK')
-	healcomm:SetTexture(0, 0, 0, 0.6)
-	healcomm:SetPoint('TOPLEFT', health, 1, -1)
-	healcomm:SetPoint('BOTTOMLEFT', health, 1, 1)
-	healcomm:SetPoint('RIGHT', health, 'LEFT')
-	self.HealComm = healcomm
-
-	local missing = self:CreateFontString(nil, 'ARTWORK')
-	missing:SetPoint('RIGHT', -2, 0)
-	missing:SetFont(FONT, 8, 'OUTLINE')
-	missing:SetJustifyH('RIGHT')
-	missing.frequentUpdates = true
-	self:Tag(missing, '[kritt:health]')
-
-	local name = self:CreateFontString(nil, 'ARTWORK')
-	name:SetPoint('LEFT', 4, 0)
-	name:SetPoint('RIGHT', missing, 'LEFT', -2, 0)
-	name:SetFont(FONT, 8, 'OUTLINE')
-	name:SetJustifyH('LEFT')
-	self:Tag(name, '[kritt:leader][kritt:name]')
-
-	local shield = self:CreateFontString(nil, 'ARTWORK')
-	shield:SetPoint('TOPLEFT', -3, 16)
-	shield:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
-	self:Tag(shield, '[kritt:shield]')
-
-	local riptide = self:CreateFontString(nil, 'ARTWORK')
-	riptide:SetPoint('BOTTOMLEFT', -3, -2)
-	riptide:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
-	self:Tag(riptide, '[kritt:riptide]')
-
-	local threat = self:CreateFontString(nil, 'ARTWORK')
-	threat:SetPoint('TOPRIGHT', 1, 16)
-	threat:SetFont([=[Fonts\FRIZQT__.TTF]=], 25, 'OUTLINE')
-	self:Tag(threat, '[kritt:threat]')
-
-	ns.Range(self)
-	ns.Dispel(self)
+	local Name = self:CreateFontString()
+	Name:SetPoint('LEFT', 4, 0)
+	Name:SetPoint('RIGHT', HealthValue, 'LEFT', -2, 0)
+	Name:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+	Name:SetJustifyH('LEFT')
+	Name:SetWordWrap(false)
+	self:Tag(Name, '[kritt:leader][raidcolor][name<|r]')
 end
 
 oUF:RegisterStyle('Kritt', style)
