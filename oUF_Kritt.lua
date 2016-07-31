@@ -53,6 +53,76 @@ local function UpdateHealth(self, event, unit)
 	end
 end
 
+local function PostCreateAura(element, Button)
+	Button.cd:SetReverse(true)
+	Button.cd:SetHideCountdownNumbers(true)
+	Button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+	Button.icon:SetDrawLayer('ARTWORK')
+end
+
+local buffWhitelist = {
+	-- Paladin, Holy
+	[1022] = true, -- Blessing of Protection
+	[1044] = true, -- Blessing of Freedom
+	[6940] = true, -- Blessing of Sacrifice
+	[31821] = true, -- Aura Mastery
+	[53563] = true, -- Beacon of Light
+	[200025] = true, -- Talent: Beacon of Virtue
+	[156910] = true, -- Talent: Beacon of Faith
+	[223306] = true, -- Talent: Bestow Faith
+	[200652] = true, -- Artifact: Tyr's Deliverance (HoT)
+	[200654] = true, -- Artifact: Tyr's Deliverance (Healing Increase)
+	[211210] = true, -- Artifact Trait: Protection of Tyr
+
+	-- Priest, Holy
+	[139] = true, -- Renew
+	[41635] = true, -- Prayer of Mending
+	[47788] = true, -- Guardian Spirit
+	[64844] = true, -- Divine Hymn
+	[77489] = true, -- Mastery: Echo of Light
+	[214121] = true, -- Talent: Body and Mind
+	[196816] = true, -- Artifact: Tranquil Light
+	[196356] = true, -- Artifact Trait: Trust in the Light
+	[208065] = true, -- Artifact Trait: Light of T'uure
+
+	-- Priest, Discipline
+	[17] = true, -- Power Word: Shield
+	[33206] = true, --Pain Suppression
+	[81782] = true, -- Power Word: Barrier
+	[194384] = true, -- Atonement
+	[152118] = true, -- Talent: Clarity of Will
+
+	-- Shaman, Resto
+	[61295] = true, -- Riptide
+	[98007] = true, -- Spirit Link
+	[208899] = true, -- Artifact Trait: Queen's Decree
+
+	-- Druid, Resto
+	[774] = true, -- Rejuvenation
+	[8936] = true, -- Regrowth
+	[33763] = true, -- Lifebloom
+	[48438] = true, -- Wild Growth
+	[48504] = true, -- Living Seed
+	[102342] = true, -- Ironbark
+	[102351] = true, -- Talent: Cenarion Ward (Trigger)
+	[102352] = true, -- Talent: Cenarion Ward (HoT)
+	[200389] = true, -- Talent: Cultivation
+	[207386] = true, -- Talent: Spring Blossoms
+	[155777] = true, -- Talent: Germination
+
+	-- Monk, Mistweaver
+	[119611] = true, -- Renewing Mist
+	[115175] = true, -- Soothing Mist
+	[191840] = true, -- Essence Font
+	[124682] = true, -- Enveloping Mist
+	[116849] = true, -- Life Cocoon
+}
+
+local function FilterBuffs(...)
+	local _, _, _, _, _, _, _, _, _, _, caster, _, _, spellID = ...
+	return caster == 'player' and buffWhitelist[spellID]
+end
+
 local function CreateIndicator(self, size)
 	local Indicator = self:CreateTexture(nil, 'OVERLAY')
 	Indicator:SetSize(size, size)
@@ -135,6 +205,16 @@ local function style(self, unit)
 	RaidIcon:SetPoint('TOP', 0, 4)
 	RaidIcon:SetSize(12, 12)
 	self.RaidIcon = RaidIcon
+
+	local Buffs = CreateFrame('Frame', nil, self)
+	Buffs:SetPoint('TOPLEFT', 2, -2)
+	Buffs:SetSize(85, 10)
+	Buffs.size = 10
+	Buffs.num = 7
+	Buffs.spacing = 3
+	Buffs.PostCreateIcon = PostCreateAura
+	Buffs.CustomFilter = FilterBuffs
+	self.Buffs = Buffs
 
 	local Threat = CreateIndicator(self, 4)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
