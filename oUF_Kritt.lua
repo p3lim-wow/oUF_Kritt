@@ -72,8 +72,8 @@ oUF:Factory(function(self)
 		'columnSpacing', 5,
 		'columnAnchorPoint', 'RIGHT',
 		'oUF-initialConfigFunction', [[
-			self:SetWidth(75)
-			self:SetHeight(23)
+			self:SetWidth(90)
+			self:SetHeight(35)
 		]]
-	):SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
+	):SetPoint('RIGHT', UIParent, 'LEFT', 776, -100)
 end)
