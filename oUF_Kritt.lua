@@ -24,6 +24,8 @@ local function UpdateHealth(self, event, unit)
 		element:SetPoint('LEFT', width, 0)
 
 		self.IncomingHeal:Hide()
+		self.Absorbs:Hide()
+		self.AbsorbsBorder:Hide()
 
 		return
 	else
@@ -37,6 +39,17 @@ local function UpdateHealth(self, event, unit)
 		self.IncomingHeal:Show()
 	else
 		self.IncomingHeal:Hide()
+	end
+
+	local absorb = UnitGetTotalAbsorbs(unit) or 0
+	if(absorb > 0) then
+		local offset = math.max(2, (width * math.min(1 - percentage, absorb / max)))
+		self.Absorbs:SetPoint('RIGHT', element, 'LEFT', offset, 0)
+		self.Absorbs:Show()
+		self.AbsorbsBorder:Show()
+	else
+		self.Absorbs:Hide()
+		self.AbsorbsBorder:Hide()
 	end
 end
 
@@ -79,12 +92,29 @@ local function style(self, unit)
 	self.Health = Health
 
 	self:RegisterEvent('UNIT_HEAL_PREDICTION', UpdateHealth)
+	self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', UpdateHealth)
+	self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', UpdateHealth)
+
 	local IncomingHeal = self:CreateTexture(nil, 'ARTWORK', nil, 1)
 	IncomingHeal:SetPoint('TOPLEFT', Health, 1, -1)
 	IncomingHeal:SetPoint('BOTTOMLEFT', Health, 1, 1)
 	IncomingHeal:SetPoint('RIGHT', Health, 'LEFT')
 	IncomingHeal:SetColorTexture(0, 0, 0, 3/5)
 	self.IncomingHeal = IncomingHeal
+
+	local Absorbs = self:CreateTexture()
+	Absorbs:SetPoint('TOPLEFT', Health)
+	Absorbs:SetPoint('BOTTOMLEFT', Health)
+	Absorbs:SetPoint('RIGHT', Health, 'LEFT')
+	Absorbs:SetColorTexture(0, 3/5, 4/5, 1)
+	self.Absorbs = Absorbs
+
+	local AbsorbBorder = self:CreateTexture(nil, 'ARTWORK', nil, 1)
+	AbsorbBorder:SetPoint('TOPRIGHT', Absorbs)
+	AbsorbBorder:SetPoint('BOTTOMRIGHT', Absorbs)
+	AbsorbBorder:SetWidth(1)
+	AbsorbBorder:SetColorTexture(1, 1, 1)
+	self.AbsorbsBorder = AbsorbBorder
 
 	local HealthValue = self:CreateFontString()
 	HealthValue:SetPoint('RIGHT', -2, 0)
