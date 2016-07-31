@@ -20,7 +20,13 @@ local function UpdateHealth(self, event, unit)
 	element:SetVertexColor(self.ColorGradient(cur, max, unpack(self.colors.smooth)))
 
 	local width = self:GetWidth()
-	element:SetPoint('LEFT', (width - 1) * percentage, 0)
+	if(UnitIsDeadOrGhost(unit) or not UnitIsConnected(unit)) then
+		element:SetPoint('LEFT', width, 0)
+
+		return
+	else
+		element:SetPoint('LEFT', (width - 1) * percentage, 0)
+	end
 end
 
 local function CreateIndicator(self, size)
