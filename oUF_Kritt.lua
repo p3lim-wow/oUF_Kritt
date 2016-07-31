@@ -18,9 +18,6 @@ local function style(self, unit)
 	self:SetScript('OnEnter', UnitFrame_OnEnter)
 	self:SetScript('OnLeave', UnitFrame_OnLeave)
 
-	self:SetAttribute('initial-height', 23)
-	self:SetAttribute('initial-width', 75)
-
 	self:SetBackdrop({bgFile =	TEXTURE, edgeFile = TEXTURE, edgeSize = 1})
 	self:SetBackdropColor(0, 0, 0, 0.5)
 	self:SetBackdropBorderColor(0, 0, 0, 0.6)
@@ -95,6 +92,10 @@ oUF:Factory(function(self)
 		'maxColumns', 5,
 		'unitsPerColumn', 5,
 		'columnSpacing', 5,
-		'columnAnchorPoint', 'RIGHT'
+		'columnAnchorPoint', 'RIGHT',
+		'oUF-initialConfigFunction', [[
+			self:SetWidth(75)
+			self:SetHeight(23)
+		]]
 	):SetPoint('RIGHT', UIParent, 'CENTER', -200, -100)
 end)
