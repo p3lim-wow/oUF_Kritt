@@ -54,6 +54,11 @@ local function style(self, unit)
 	Name:SetJustifyH('LEFT')
 	Name:SetWordWrap(false)
 	self:Tag(Name, '[kritt:leader][raidcolor][name<|r]')
+
+	local RaidIcon = self:CreateTexture(nil, 'OVERLAY')
+	RaidIcon:SetPoint('TOP', 0, 4)
+	RaidIcon:SetSize(12, 12)
+	self.RaidIcon = RaidIcon
 end
 
 oUF:RegisterStyle('Kritt', style)
