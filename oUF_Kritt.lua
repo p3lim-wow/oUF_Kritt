@@ -123,6 +123,16 @@ local function FilterBuffs(...)
 	return caster == 'player' and buffWhitelist[spellID]
 end
 
+local debuffWhitelist = {
+	[25771] = true, -- Forbearance (Paladin)
+	[219521] = true, -- Shadow Covenant (Priest, Discipline)
+}
+
+local function FilterDebuffs(...)
+	local _, _, _, _, _, _, _, _, _, _, caster, _, _, spellID = ...
+	return not UnitIsPlayer(caster) or debuffWhitelist[spellID]
+end
+
 local function CreateIndicator(self, size)
 	local Indicator = self:CreateTexture(nil, 'OVERLAY')
 	Indicator:SetSize(size, size)
@@ -215,6 +225,16 @@ local function style(self, unit)
 	Buffs.PostCreateIcon = PostCreateAura
 	Buffs.CustomFilter = FilterBuffs
 	self.Buffs = Buffs
+
+	local Debuffs = CreateFrame('Frame', nil, self)
+	Debuffs:SetPoint('BOTTOMLEFT', 2, 2)
+	Debuffs:SetSize(85, 10)
+	Debuffs.size = 10
+	Debuffs.num = 7
+	Debuffs.spacing = 3
+	Debuffs.PostCreateIcon = PostCreateAura
+	Debuffs.CustomFilter = FilterDebuffs
+	self.Debuffs = Debuffs
 
 	local Threat = CreateIndicator(self, 4)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
