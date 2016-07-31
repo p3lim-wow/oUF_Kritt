@@ -23,9 +23,20 @@ local function UpdateHealth(self, event, unit)
 	if(UnitIsDeadOrGhost(unit) or not UnitIsConnected(unit)) then
 		element:SetPoint('LEFT', width, 0)
 
+		self.IncomingHeal:Hide()
+
 		return
 	else
 		element:SetPoint('LEFT', (width - 1) * percentage, 0)
+	end
+
+	local incoming = UnitGetIncomingHeals(unit) or 0
+	if(incoming > 0) then
+		local offset = (width - 2) * math.min(1 - percentage, incoming / max)
+		self.IncomingHeal:SetPoint('RIGHT', element, 'LEFT', offset, 0)
+		self.IncomingHeal:Show()
+	else
+		self.IncomingHeal:Hide()
 	end
 end
 
@@ -66,6 +77,14 @@ local function style(self, unit)
 	Health:SetColorTexture(2/3, 2/3, 2/3)
 	Health.Override = UpdateHealth
 	self.Health = Health
+
+	self:RegisterEvent('UNIT_HEAL_PREDICTION', UpdateHealth)
+	local IncomingHeal = self:CreateTexture(nil, 'ARTWORK', nil, 1)
+	IncomingHeal:SetPoint('TOPLEFT', Health, 1, -1)
+	IncomingHeal:SetPoint('BOTTOMLEFT', Health, 1, 1)
+	IncomingHeal:SetPoint('RIGHT', Health, 'LEFT')
+	IncomingHeal:SetColorTexture(0, 0, 0, 3/5)
+	self.IncomingHeal = IncomingHeal
 
 	local HealthValue = self:CreateFontString()
 	HealthValue:SetPoint('RIGHT', -2, 0)
