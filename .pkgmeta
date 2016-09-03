@@ -1,0 +1,16 @@
+package-as: oUF_Kritt
+
+enable-nolib-creation: no
+
+externals:
+  embeds/oUF: git://github.com/p3lim-wow/oUF.git
+  embeds/oUF_Resurrect:
+    url: git://github.com/p3lim-wow/oUF_Resurrect.git
+    tag: latest
+  embeds/oUF_DispelHighlight:
+    url: git://github.com/p3lim-wow/oUF_DispelHighlight.git
+    tag: latest
+
+tools-used:
+  - ouf-resurrect
+  - ouf-dispelhighlight
