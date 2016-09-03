@@ -245,7 +245,7 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	Resurrect:SetSize(20, 20)
 	self.Resurrect = Resurrect
 
-	self.DebuffHighlightBorder = true
+	self.DispelHighlightBorder = true
 	self.Range = {
 		insideAlpha = 1,
 		outsideAlpha = 1/5

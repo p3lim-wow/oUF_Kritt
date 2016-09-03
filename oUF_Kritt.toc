@@ -5,14 +5,14 @@
 ## Notes: Healer-oriented raid frames
 ## X-oUF: oUF_Kritt
 
-embeds\LibStub\LibStub.lua
-embeds\CallbackHandler-1.0\CallbackHandler-1.0\CallbackHandler-1.0.lua
-embeds\LibResInfo-1.0\LibResInfo-1.0.lua
-
 embeds\oUF\oUF.xml
+embeds\oUF_Resurrect\embed.xml
+embeds\oUF_DispelHighlight\oUF_DispelHighlight.lua
 
-elements\DebuffHighlight.lua
-elements\Resurrect.lua
-elements\Tags.lua
+#@do-not-package@
+..\oUF\oUF.xml
+..\oUF_Resurrect\oUF_Resurrect.xml
+..\oUF_DispelHighlight\oUF_DispelHighlight.lua
+#@end-do-not-package@
 
 oUF_Kritt.lua
