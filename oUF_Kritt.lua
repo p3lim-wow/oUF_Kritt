@@ -1,7 +1,7 @@
 ﻿local _, ns = ...
 local oUF = ns.oUF
 
-local FONT = [[Interface\AddOns\oUF_Kritt\semplice.ttf]]
+local FONT = [[Interface\AddOns\oUF_Kritt\assets\semplice.ttf]]
 local TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
 local BACKDROP = {
 	bgFile = TEXTURE, edgeFile = TEXTURE, edgeSize = 1
