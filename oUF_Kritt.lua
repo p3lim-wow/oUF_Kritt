@@ -7,6 +7,14 @@ local BACKDROP = {
 	bgFile = TEXTURE, edgeFile = TEXTURE, edgeSize = 1
 }
 
+local dispelAbilities = {
+	PRIEST = 527, -- Discipline/Holy Priest - Purify
+	PALADIN = 4987, -- Holy Paladin - Cleanse
+	SHAMAN = 77130, -- Restoration Shaman - Purify Spirit
+	DRUID = 88423, -- Restoration Druid - Nature's Cure
+	MONK = 115450, -- Mistweaver Monk - Detox
+}
+
 local function UpdateHealth(self, event, unit)
 	if(self.unit ~= unit) then
 		return
@@ -250,6 +258,10 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 		insideAlpha = 1,
 		outsideAlpha = 1/5
 	}
+
+	-- Binds whatever dispel ability the class/spec provides to middle mouse button
+	self:SetAttribute('type3', 'spell')
+	self:SetAttribute('spell', GetSpellInfo(dispelAbilities[select(2, UnitClass('player'))]))
 end)
 
 oUF:SetActiveStyle('Kritt')
