@@ -15,4 +15,5 @@ embeds\oUF_DispelHighlight\oUF_DispelHighlight.lua
 ..\oUF_DispelHighlight\oUF_DispelHighlight.lua
 #@end-do-not-package@
 
+Tags.lua
 oUF_Kritt.lua
