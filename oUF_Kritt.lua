@@ -15,6 +15,24 @@ local dispelAbilities = {
 	MONK = 115450, -- Mistweaver Monk - Detox
 }
 
+local resurrectAbilities = {
+	DRUID = 20484, -- Rebirth
+	WARLOCK = 20707, -- Soulstone
+	DEATH_KNIGHT = 46584, -- Raise Dead
+}
+
+local playerClass, clickMacro = (select(2, UnitClass('player')))
+local resurrectAbility = resurrectAbilities[playerClass]
+if(resurrectAbility) then
+	clickMacro = string.format('/cast [@mouseover,dead] %s', GetSpellInfo(resurrectAbility))
+end
+
+local dispelAbility = dispelAbilities[playerClass]
+if(dispelAbility) then
+	local macro = string.format('/cast [@mouseover] %s', GetSpellInfo(dispelAbility))
+	clickMacro = clickMacro and clickMacro .. '\n' .. macro or macro
+end
+
 local function UpdateHealth(self, event, unit)
 	if(self.unit ~= unit) then
 		return
@@ -260,8 +278,8 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	}
 
 	-- Binds whatever dispel ability the class/spec provides to middle mouse button
-	self:SetAttribute('type3', 'spell')
-	self:SetAttribute('spell', GetSpellInfo(dispelAbilities[select(2, UnitClass('player'))]))
+	self:SetAttribute('type3', 'macro')
+	self:SetAttribute('macrotext', clickMacro)
 end)
 
 oUF:SetActiveStyle('Kritt')
