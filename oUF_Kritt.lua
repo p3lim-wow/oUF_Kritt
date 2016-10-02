@@ -79,6 +79,22 @@ local function UpdateHealth(self, event, unit)
 	end
 end
 
+local function UpdateRoleIcon(self)
+	local element = self.LFDRole
+
+	local role = UnitGroupRolesAssigned(self.unit)
+	if(role == 'DAMAGER' or role == 'HEALER' or role == 'TANK') then
+		element:SetTexCoord(GetTexCoordsForRoleSmall(role))
+		element:Show()
+	else
+		element:Hide()
+	end
+end
+
+local function UpdateRoleIconVisibility(self)
+	self.LFDRole:SetAlpha(IsAltKeyDown() and not UnitAffectingCombat('player') and  1 or 0)
+end
+
 local function PostCreateAura(element, Button)
 	Button.cd:SetReverse(true)
 	Button.cd:SetHideCountdownNumbers(true)
@@ -265,6 +281,15 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	local Threat = CreateIndicator(self, 4)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
 	self.Threat = Threat
+
+	local RoleIcon = self:CreateTexture(nil, 'OVERLAY')
+	RoleIcon:SetPoint('CENTER')
+	RoleIcon:SetSize(20, 20)
+	RoleIcon:SetTexture([[Interface\LFGFrame\LFGRole]])
+	RoleIcon:SetAlpha(0)
+	RoleIcon.Override = UpdateRoleIcon
+	self.LFDRole = RoleIcon
+	self:RegisterEvent('MODIFIER_STATE_CHANGED', UpdateRoleIconVisibility)
 
 	local ReadyCheck = self:CreateTexture()
 	ReadyCheck:SetPoint('TOPRIGHT', -1, -1)
