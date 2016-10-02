@@ -85,7 +85,7 @@ local function UpdatePower(self, event, unit)
 	end
 
 	local element = self.Power
-	local visibility
+	local visibility = false
 
 	if(UnitIsConnected(unit) and not UnitHasVehicleUI(unit)) then
 		local role = UnitGroupRolesAssigned(unit)
