@@ -79,6 +79,32 @@ local function UpdateHealth(self, event, unit)
 	end
 end
 
+local function UpdatePower(self, event, unit)
+	if(unit ~= self.unit) then
+		return
+	end
+
+	local element = self.Power
+	local visibility
+
+	if(UnitIsConnected(unit) and not UnitHasVehicleUI(unit)) then
+		local role = UnitGroupRolesAssigned(unit)
+		visibility = role == 'HEALER'
+	end
+
+	if(visibility) then
+		element:SetMinMaxValues(0, UnitPowerMax(unit, SPELL_POWER_MANA))
+		element:SetValue(UnitPower(unit, SPELL_POWER_MANA))
+	end
+
+	if(element.visibility ~= visibility) then
+		element:SetShown(visibility)
+		element:GetParent().Health:SetPoint('BOTTOMRIGHT', -1, visibility and 3 or 1)
+
+		element.visibility = visibility
+	end
+end
+
 local function UpdateRoleIcon(self)
 	local element = self.LFDRole
 
@@ -197,6 +223,8 @@ local function CreateIndicator(self, size)
 end
 
 oUF:RegisterStyle('Kritt', function(self, unit)
+	self.colors.power.MANA = {0, 144/255, 1}
+
 	self:RegisterForClicks('AnyUp')
 	self:SetScript('OnEnter', UnitFrame_OnEnter)
 	self:SetScript('OnLeave', UnitFrame_OnLeave)
@@ -244,6 +272,15 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	HealthValue:SetJustifyH('RIGHT')
 	HealthValue:SetWordWrap(false)
 	self:Tag(HealthValue, '[kritt:health]')
+
+	local Power = CreateFrame('StatusBar', nil, self)
+	Power:SetPoint('BOTTOMLEFT', 1, 1)
+	Power:SetPoint('BOTTOMRIGHT', -1, 1)
+	Power:SetHeight(1)
+	Power:SetStatusBarTexture(TEXTURE)
+	Power:SetStatusBarColor(unpack(self.colors.power.MANA))
+	Power.Override = UpdatePower
+	self.Power = Power
 
 	local Name = self:CreateFontString()
 	Name:SetPoint('LEFT', 4, 0)
