@@ -266,6 +266,11 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
 	self.Threat = Threat
 
+	local ReadyCheck = self:CreateTexture()
+	ReadyCheck:SetPoint('TOPRIGHT', -1, -1)
+	ReadyCheck:SetSize(12, 12)
+	self.ReadyCheck = ReadyCheck
+
 	local Resurrect = self:CreateTexture(nil, 'OVERLAY')
 	Resurrect:SetPoint('RIGHT', -5, -1)
 	Resurrect:SetSize(20, 20)
