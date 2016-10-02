@@ -105,6 +105,10 @@ local function UpdatePower(self, event, unit)
 	end
 end
 
+local function PostUpdatePower(element, unit, cur, max)
+	element:GetParent():SetShown(max ~= 0 and cur ~= 0 and cur ~= max)
+end
+
 local function UpdateRoleIcon(self)
 	local element = self.LFDRole
 
@@ -126,6 +130,65 @@ local function PostCreateAura(element, Button)
 	Button.cd:SetHideCountdownNumbers(true)
 	Button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 	Button.icon:SetDrawLayer('ARTWORK')
+end
+
+local function OnUpdateAura(self, elapsed)
+	if(self.expiration) then
+		self.expiration = math.max(self.expiration - elapsed, 0)
+
+		if(self.expiration > 0 and self.expiration < 60) then
+			self.Duration:SetFormattedText('%d', self.expiration)
+		else
+			self.Duration:SetText()
+		end
+	end
+end
+
+local function PostCreateTargetAura(element, Button)
+	PostCreateAura(element, Button)
+
+	Button:SetBackdrop(BACKDROP)
+	Button:SetBackdropBorderColor(0, 0, 0)
+
+	Button.icon:ClearAllPoints()
+	Button.icon:SetPoint('TOPLEFT', 1, -1)
+	Button.icon:SetPoint('BOTTOMRIGHT', -1, 1)
+
+	Button.count:ClearAllPoints()
+	Button.count:SetPoint('BOTTOMRIGHT', Button, 2, 1)
+	Button.count:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+
+	local Duration = Button:CreateFontString()
+	Duration:SetPoint('TOPLEFT', 0, -1)
+	Duration:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+	Button.Duration = Duration
+
+	Button:HookScript('OnUpdate', OnUpdateAura)
+end
+
+local function PostUpdateTargetAura(element, unit, Button, index)
+	local _, _, _, _, _, duration, expiration, owner, canStealOrPurge = UnitAura(unit, index, Button.filter)
+
+	if(duration and duration > 0) then
+		Button.expiration = expiration - GetTime()
+	else
+		Button.expiration = math.huge
+	end
+
+	if(unit == 'target' and canStealOrPurge) then
+		Button:SetBackdropBorderColor(0, 1/2, 1/2)
+	elseif(owner ~= 'player') then
+		Button:SetBackdropBorderColor(0, 0, 0)
+	end
+end
+
+local function PostUpdateCast(element, unit)
+	local Spark = element.Spark
+	if(not element.interrupt and UnitCanAttack('player', unit)) then
+		Spark:SetColorTexture(1, 0, 0)
+	else
+		Spark:SetColorTexture(1, 1, 1)
+	end
 end
 
 local buffWhitelist = {
@@ -226,7 +289,131 @@ local function CreateIndicator(self, size)
 	return Indicator
 end
 
+local UnitSpecific = {
+	player = function(self, unit)
+		local PowerPrediction = CreateFrame('StatusBar', nil, self.Power)
+		PowerPrediction:SetPoint('RIGHT', self.Power:GetStatusBarTexture())
+		PowerPrediction:SetPoint('BOTTOM')
+		PowerPrediction:SetPoint('TOP')
+		PowerPrediction:SetWidth(230)
+		PowerPrediction:SetStatusBarTexture(TEXTURE)
+		PowerPrediction:SetStatusBarColor(1, 0, 0)
+		PowerPrediction:SetReverseFill(true)
+		self.PowerPrediction = {
+			mainBar = PowerPrediction
+		}
+
+		local PowerValue = self:CreateFontString()
+		PowerValue:SetPoint('LEFT', 4, 0)
+		PowerValue:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+		PowerValue:SetJustifyH('LEFT')
+		PowerValue:SetWordWrap(false)
+		self:Tag(PowerValue, '[powercolor][kritt:curpp]|r[ |cff0090ff>kritt:addpp<%|r][ : >kritt:cast]')
+
+		self:Tag(self.HealthValue, '[kritt:status][kritt:maxhp][|cffff8080->kritt:defhp<|r][ >kritt:perhp<|cff0090ff%|r]')
+	end,
+	target = function(self, unit)
+		local Buffs = CreateFrame('Frame', nil, self)
+		Buffs:SetPoint('TOPLEFT', self, 'TOPRIGHT', 3, 0)
+		Buffs:SetSize(236, 44)
+		Buffs.num = 27
+		Buffs.size = 22
+		Buffs.spacing = 3
+		Buffs.initialAnchor = 'TOPLEFT'
+		Buffs['growth-y'] = 'DOWN'
+		Buffs.PostCreateIcon = PostCreateTargetAura
+		Buffs.PostUpdateIcon = PostUpdateTargetAura
+		self.Buffs = Buffs
+
+		local Debuffs = CreateFrame('Frame', nil, self)
+		Debuffs:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 0, 3)
+		Debuffs:SetSize(22, 200)
+		Debuffs.num = 10
+		Debuffs.size = 22
+		Debuffs.spacing = 3
+		Debuffs.initialAnchor = 'BOTTOMLEFT'
+		Debuffs['growth-y'] = 'UP'
+		Debuffs.PostCreateIcon = PostCreateTargetAura
+		Debuffs.PostUpdateIcon = PostUpdateTargetAura
+		self.Debuffs = Debuffs
+
+		self.Castbar.PostCastStart = PostUpdateCast
+		self.Castbar.PostCastInterruptible = PostUpdateCast
+		self.Castbar.PostCastNotInterruptible = PostUpdateCast
+		self.Castbar.PostChannelStart = PostUpdateCast
+
+		self:Tag(self.HealthValue, '[kritt:status][kritt:curhp][ >kritt:targethp]')
+		self:Tag(self.Name, '[kritt:name]')
+	end,
+	party = function(self, unit)
+		local Power = self.Power
+		Power:SetPoint('BOTTOMLEFT', 1, 1)
+		Power:SetPoint('BOTTOMRIGHT', -1, 1)
+		Power:SetHeight(1)
+		Power:SetStatusBarColor(unpack(self.colors.power.MANA))
+		Power.Override = UpdatePower
+
+		local HealthValue = self:CreateFontString()
+		HealthValue:SetPoint('RIGHT', -2, 0)
+		HealthValue:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+		HealthValue:SetJustifyH('RIGHT')
+		HealthValue:SetWordWrap(false)
+		self:Tag(HealthValue, '[kritt:grouphp]')
+
+		local Buffs = CreateFrame('Frame', nil, self)
+		Buffs:SetPoint('TOPLEFT', 2, -2)
+		Buffs:SetSize(85, 10)
+		Buffs.size = 10
+		Buffs.num = 7
+		Buffs.spacing = 3
+		Buffs.PostCreateIcon = PostCreateAura
+		Buffs.CustomFilter = FilterBuffs
+		self.Buffs = Buffs
+
+		local Debuffs = CreateFrame('Frame', nil, self)
+		Debuffs:SetPoint('BOTTOMLEFT', 2, 2)
+		Debuffs:SetSize(85, 10)
+		Debuffs.size = 10
+		Debuffs.num = 7
+		Debuffs.spacing = 3
+		Debuffs.PostCreateIcon = PostCreateAura
+		Debuffs.CustomFilter = FilterDebuffs
+		self.Debuffs = Debuffs
+
+		local RoleIcon = self:CreateTexture(nil, 'OVERLAY')
+		RoleIcon:SetPoint('CENTER')
+		RoleIcon:SetSize(20, 20)
+		RoleIcon:SetTexture([[Interface\LFGFrame\LFGRole]])
+		RoleIcon:SetAlpha(0)
+		RoleIcon.Override = UpdateRoleIcon
+		self.LFDRole = RoleIcon
+		self:RegisterEvent('MODIFIER_STATE_CHANGED', UpdateRoleIconVisibility)
+
+		local ReadyCheck = self:CreateTexture()
+		ReadyCheck:SetPoint('TOPRIGHT', -1, -1)
+		ReadyCheck:SetSize(12, 12)
+		self.ReadyCheck = ReadyCheck
+
+		local Resurrect = self:CreateTexture(nil, 'OVERLAY')
+		Resurrect:SetPoint('RIGHT', -5, -1)
+		Resurrect:SetSize(20, 20)
+		self.Resurrect = Resurrect
+
+		self.DispelHighlightBorder = true
+		self.Range = {
+			insideAlpha = 1,
+			outsideAlpha = 1/5
+		}
+
+		self.Name:SetPoint('RIGHT', HealthValue, 'LEFT', -2, 0)
+		self:Tag(self.Name, '[kritt:leader][raidcolor][name<|r]')
+	end
+}
+UnitSpecific.raid = UnitSpecific.party
+
 oUF:RegisterStyle('Kritt', function(self, unit)
+	unit = unit:match('(boss)%d?$') or unit:match('(arena)%d?$') or unit
+
 	self.colors.power.MANA = {0, 144/255, 1}
 
 	self:RegisterForClicks('AnyUp')
@@ -270,90 +457,81 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	AbsorbBorder:SetColorTexture(1, 1, 1)
 	self.AbsorbsBorder = AbsorbBorder
 
-	local HealthValue = self:CreateFontString()
-	HealthValue:SetPoint('RIGHT', -2, 0)
-	HealthValue:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
-	HealthValue:SetJustifyH('RIGHT')
-	HealthValue:SetWordWrap(false)
-	self:Tag(HealthValue, '[kritt:health]')
-
 	local Power = CreateFrame('StatusBar', nil, self)
-	Power:SetPoint('BOTTOMLEFT', 1, 1)
-	Power:SetPoint('BOTTOMRIGHT', -1, 1)
-	Power:SetHeight(1)
 	Power:SetStatusBarTexture(TEXTURE)
-	Power:SetStatusBarColor(unpack(self.colors.power.MANA))
-	Power.Override = UpdatePower
 	self.Power = Power
-
-	local Name = self:CreateFontString()
-	Name:SetPoint('LEFT', 4, 0)
-	Name:SetPoint('RIGHT', HealthValue, 'LEFT', -2, 0)
-	Name:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
-	Name:SetJustifyH('LEFT')
-	Name:SetWordWrap(false)
-	self:Tag(Name, '[kritt:leader][raidcolor][name<|r]')
 
 	local RaidIcon = self:CreateTexture(nil, 'OVERLAY')
 	RaidIcon:SetPoint('TOP', 0, 4)
 	RaidIcon:SetSize(12, 12)
 	self.RaidIcon = RaidIcon
 
-	local Buffs = CreateFrame('Frame', nil, self)
-	Buffs:SetPoint('TOPLEFT', 2, -2)
-	Buffs:SetSize(85, 10)
-	Buffs.size = 10
-	Buffs.num = 7
-	Buffs.spacing = 3
-	Buffs.PostCreateIcon = PostCreateAura
-	Buffs.CustomFilter = FilterBuffs
-	self.Buffs = Buffs
-
-	local Debuffs = CreateFrame('Frame', nil, self)
-	Debuffs:SetPoint('BOTTOMLEFT', 2, 2)
-	Debuffs:SetSize(85, 10)
-	Debuffs.size = 10
-	Debuffs.num = 7
-	Debuffs.spacing = 3
-	Debuffs.PostCreateIcon = PostCreateAura
-	Debuffs.CustomFilter = FilterDebuffs
-	self.Debuffs = Debuffs
-
 	local Threat = CreateIndicator(self, 4)
 	Threat:SetPoint('TOPRIGHT', -3, -3)
 	self.Threat = Threat
 
-	local RoleIcon = self:CreateTexture(nil, 'OVERLAY')
-	RoleIcon:SetPoint('CENTER')
-	RoleIcon:SetSize(20, 20)
-	RoleIcon:SetTexture([[Interface\LFGFrame\LFGRole]])
-	RoleIcon:SetAlpha(0)
-	RoleIcon.Override = UpdateRoleIcon
-	self.LFDRole = RoleIcon
-	self:RegisterEvent('MODIFIER_STATE_CHANGED', UpdateRoleIconVisibility)
+	if(unit ~= 'player') then
+		local Name = self:CreateFontString()
+		Name:SetPoint('LEFT', 4, 0)
+		Name:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+		Name:SetJustifyH('LEFT')
+		Name:SetWordWrap(false)
+		self.Name = Name
+	end
 
-	local ReadyCheck = self:CreateTexture()
-	ReadyCheck:SetPoint('TOPRIGHT', -1, -1)
-	ReadyCheck:SetSize(12, 12)
-	self.ReadyCheck = ReadyCheck
+	if(unit == 'player' or unit == 'target') then
+		self:SetSize(250, 22)
 
-	local Resurrect = self:CreateTexture(nil, 'OVERLAY')
-	Resurrect:SetPoint('RIGHT', -5, -1)
-	Resurrect:SetSize(20, 20)
-	self.Resurrect = Resurrect
+		local HealthValue = self:CreateFontString()
+		HealthValue:SetPoint('RIGHT', -4, 0)
+		HealthValue:SetFont(FONT, 8, 'OUTLINEMONOCHROME')
+		HealthValue:SetJustifyH('RIGHT')
+		self.HealthValue = HealthValue
 
-	self.DispelHighlightBorder = true
-	self.Range = {
-		insideAlpha = 1,
-		outsideAlpha = 1/5
-	}
+		local PowerParent = CreateFrame('Frame', nil, self)
+		PowerParent:SetPoint('TOP', self, 'BOTTOM', 0, -3)
+		PowerParent:SetSize(self:GetWidth(), 4)
+		PowerParent:SetBackdrop(BACKDROP)
+		PowerParent:SetBackdropColor(0, 0, 0, 1/2)
+		PowerParent:SetBackdropBorderColor(0, 0, 0)
+
+		Power:SetParent(PowerParent)
+		Power:SetPoint('TOPLEFT', PowerParent, 1, -1)
+		Power:SetPoint('BOTTOMRIGHT', PowerParent, -1, 1)
+		Power.PostUpdate = PostUpdatePower
+		Power.frequentUpdates = true
+		Power.colorClass = true
+		Power.colorTapping = true
+		Power.colorDisconnected = true
+		Power.colorReaction = true
+
+		local Castbar = CreateFrame('StatusBar', nil, self)
+		Castbar:SetAllPoints()
+		Castbar:SetStatusBarTexture(TEXTURE)
+		Castbar:SetStatusBarColor(0, 0, 0, 0)
+		Castbar:SetFrameStrata('HIGH')
+		self.Castbar = Castbar
+
+		local Spark = Castbar:CreateTexture(nil, 'OVERLAY')
+		Spark:SetSize(2, self:GetHeight() - 2)
+		Spark:SetColorTexture(1, 1, 1)
+		Castbar.Spark = Spark
+	end
 
 	-- Binds whatever dispel ability the class/spec provides to middle mouse button
 	self:SetAttribute('type3', 'macro')
 	self:SetAttribute('macrotext', clickMacro)
+
+	if(UnitSpecific[unit]) then
+		return UnitSpecific[unit](self)
+	end
 end)
 
 oUF:SetActiveStyle('Kritt')
+
+oUF:Spawn('player'):SetPoint('CENTER', -300, -250)
+oUF:Spawn('target'):SetPoint('CENTER', 300, -250)
+
 oUF:SpawnHeader(nil, nil, nil,
 	'showPlayer', true,
 	'showParty', true,
