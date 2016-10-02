@@ -201,6 +201,14 @@ local function FilterDebuffs(...)
 	return not UnitIsPlayer(caster) or debuffWhitelist[spellID]
 end
 
+local function OnIndicatorShow(self)
+	self.Background:Show()
+end
+
+local function OnIndicatorHide(self)
+	self.Background:Hide()
+end
+
 local function CreateIndicator(self, size)
 	local Indicator = self:CreateTexture(nil, 'OVERLAY')
 	Indicator:SetSize(size, size)
@@ -210,14 +218,10 @@ local function CreateIndicator(self, size)
 	Background:SetPoint('CENTER', Indicator)
 	Background:SetSize(size + 2, size + 2)
 	Background:SetColorTexture(0, 0, 0)
+	Indicator.Background = Background
 
-	hooksecurefunc(Indicator, 'Show', function()
-		Background:Show()
-	end)
-
-	hooksecurefunc(Indicator, 'Hide', function()
-		Background:Hide()
-	end)
+	hooksecurefunc(Indicator, 'Show', OnIndicatorShow)
+	hooksecurefunc(Indicator, 'Hide', OnIndicatorHide)
 
 	return Indicator
 end
