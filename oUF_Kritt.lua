@@ -49,33 +49,37 @@ local function UpdateHealth(self, event, unit)
 	if(UnitIsDeadOrGhost(unit) or not UnitIsConnected(unit)) then
 		element:SetPoint('LEFT', width, 0)
 
-		self.IncomingHeal:Hide()
-		self.Absorbs:Hide()
-		self.AbsorbsBorder:Hide()
+		if(self.IncomingHeal) then
+			self.IncomingHeal:Hide()
+			self.Absorbs:Hide()
+			self.AbsorbsBorder:Hide()
+		end
 
 		return
 	else
 		element:SetPoint('LEFT', (width - 1) * percentage, 0)
 	end
 
-	local incoming = UnitGetIncomingHeals(unit) or 0
-	if(incoming > 0) then
-		local offset = (width - 2) * math.min(1 - percentage, incoming / max)
-		self.IncomingHeal:SetPoint('RIGHT', element, 'LEFT', offset, 0)
-		self.IncomingHeal:Show()
-	else
-		self.IncomingHeal:Hide()
-	end
+	if(self.IncomingHeal) then
+		local incoming = UnitGetIncomingHeals(unit) or 0
+		if(incoming > 0) then
+			local offset = (width - 2) * math.min(1 - percentage, incoming / max)
+			self.IncomingHeal:SetPoint('RIGHT', element, 'LEFT', offset, 0)
+			self.IncomingHeal:Show()
+		else
+			self.IncomingHeal:Hide()
+		end
 
-	local absorb = UnitGetTotalAbsorbs(unit) or 0
-	if(absorb > 0) then
-		local offset = math.max(2, (width * math.min(1 - percentage, absorb / max)))
-		self.Absorbs:SetPoint('RIGHT', element, 'LEFT', offset, 0)
-		self.Absorbs:Show()
-		self.AbsorbsBorder:Show()
-	else
-		self.Absorbs:Hide()
-		self.AbsorbsBorder:Hide()
+		local absorb = UnitGetTotalAbsorbs(unit) or 0
+		if(absorb > 0) then
+			local offset = math.max(2, (width * math.min(1 - percentage, absorb / max)))
+			self.Absorbs:SetPoint('RIGHT', element, 'LEFT', offset, 0)
+			self.Absorbs:Show()
+			self.AbsorbsBorder:Show()
+		else
+			self.Absorbs:Hide()
+			self.AbsorbsBorder:Hide()
+		end
 	end
 end
 
@@ -371,7 +375,7 @@ local UnitSpecific = {
 		HealthValue:SetWordWrap(false)
 		self:Tag(HealthValue, '[kritt:grouphp]')
 
-		if(self:GetAttribute('healerLayout')) then
+		if(self:GetParent():GetAttribute('healerLayout')) then
 			local Buffs = CreateFrame('Frame', nil, self)
 			Buffs:SetPoint('TOPLEFT', 2, -2)
 			Buffs:SetSize(85, 10)
@@ -445,30 +449,33 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	Health.Override = UpdateHealth
 	self.Health = Health
 
-	self:RegisterEvent('UNIT_HEAL_PREDICTION', UpdateHealth)
-	self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', UpdateHealth)
-	self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', UpdateHealth)
+	local healerLayout = self:GetParent():GetAttribute('healerLayout')
+	if(healerLayout or unit == 'player' or unit == 'target') then
+		self:RegisterEvent('UNIT_HEAL_PREDICTION', UpdateHealth)
+		self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', UpdateHealth)
+		self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', UpdateHealth)
 
-	local IncomingHeal = self:CreateTexture(nil, 'ARTWORK', nil, 1)
-	IncomingHeal:SetPoint('TOPLEFT', Health, 1, -1)
-	IncomingHeal:SetPoint('BOTTOMLEFT', Health, 1, 1)
-	IncomingHeal:SetPoint('RIGHT', Health, 'LEFT')
-	IncomingHeal:SetColorTexture(0, 0, 0, 3/5)
-	self.IncomingHeal = IncomingHeal
+		local IncomingHeal = self:CreateTexture(nil, 'ARTWORK', nil, 1)
+		IncomingHeal:SetPoint('TOPLEFT', Health, 1, -1)
+		IncomingHeal:SetPoint('BOTTOMLEFT', Health, 1, 1)
+		IncomingHeal:SetPoint('RIGHT', Health, 'LEFT')
+		IncomingHeal:SetColorTexture(0, 0, 0, 3/5)
+		self.IncomingHeal = IncomingHeal
 
-	local Absorbs = self:CreateTexture()
-	Absorbs:SetPoint('TOPLEFT', Health)
-	Absorbs:SetPoint('BOTTOMLEFT', Health)
-	Absorbs:SetPoint('RIGHT', Health, 'LEFT')
-	Absorbs:SetColorTexture(0, 3/5, 4/5, 1)
-	self.Absorbs = Absorbs
+		local Absorbs = self:CreateTexture()
+		Absorbs:SetPoint('TOPLEFT', Health)
+		Absorbs:SetPoint('BOTTOMLEFT', Health)
+		Absorbs:SetPoint('RIGHT', Health, 'LEFT')
+		Absorbs:SetColorTexture(0, 3/5, 4/5, 1)
+		self.Absorbs = Absorbs
 
-	local AbsorbBorder = self:CreateTexture(nil, 'ARTWORK', nil, 1)
-	AbsorbBorder:SetPoint('TOPRIGHT', Absorbs)
-	AbsorbBorder:SetPoint('BOTTOMRIGHT', Absorbs)
-	AbsorbBorder:SetWidth(1)
-	AbsorbBorder:SetColorTexture(1, 1, 1)
-	self.AbsorbsBorder = AbsorbBorder
+		local AbsorbBorder = self:CreateTexture(nil, 'ARTWORK', nil, 1)
+		AbsorbBorder:SetPoint('TOPRIGHT', Absorbs)
+		AbsorbBorder:SetPoint('BOTTOMRIGHT', Absorbs)
+		AbsorbBorder:SetWidth(1)
+		AbsorbBorder:SetColorTexture(1, 1, 1)
+		self.AbsorbsBorder = AbsorbBorder
+	end
 
 	local Power = CreateFrame('StatusBar', nil, self)
 	Power:SetStatusBarTexture(TEXTURE)
@@ -535,7 +542,7 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 		Castbar.Spark = Spark
 	end
 
-	if(self:GetAttribute('healerLayout')) then
+	if(healerLayoyt) then
 		-- Binds whatever dispel ability the class/spec provides to middle mouse button
 		self:SetAttribute('type3', 'macro')
 		self:SetAttribute('macrotext', clickMacro)
