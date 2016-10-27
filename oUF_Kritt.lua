@@ -327,25 +327,27 @@ local UnitSpecific = {
 		HealthValue:SetWordWrap(false)
 		self:Tag(HealthValue, '[kritt:grouphp]')
 
-		local Buffs = CreateFrame('Frame', nil, self)
-		Buffs:SetPoint('TOPLEFT', 2, -2)
-		Buffs:SetSize(85, 10)
-		Buffs.size = 10
-		Buffs.num = 7
-		Buffs.spacing = 3
-		Buffs.PostCreateIcon = PostCreateGroupAura
-		Buffs.CustomFilter = FilterBuffs
-		self.Buffs = Buffs
+		if(self:GetAttribute('healerLayout')) then
+			local Buffs = CreateFrame('Frame', nil, self)
+			Buffs:SetPoint('TOPLEFT', 2, -2)
+			Buffs:SetSize(85, 10)
+			Buffs.size = 10
+			Buffs.num = 7
+			Buffs.spacing = 3
+			Buffs.PostCreateIcon = PostCreateGroupAura
+			Buffs.CustomFilter = FilterBuffs
+			self.Buffs = Buffs
 
-		local Debuffs = CreateFrame('Frame', nil, self)
-		Debuffs:SetPoint('BOTTOMLEFT', 2, 2)
-		Debuffs:SetSize(85, 10)
-		Debuffs.size = 10
-		Debuffs.num = 7
-		Debuffs.spacing = 3
-		Debuffs.PostCreateIcon = PostCreateGroupAura
-		Debuffs.CustomFilter = FilterDebuffs
-		self.Debuffs = Debuffs
+			local Debuffs = CreateFrame('Frame', nil, self)
+			Debuffs:SetPoint('BOTTOMLEFT', 2, 2)
+			Debuffs:SetSize(85, 10)
+			Debuffs.size = 10
+			Debuffs.num = 7
+			Debuffs.spacing = 3
+			Debuffs.PostCreateIcon = PostCreateGroupAura
+			Debuffs.CustomFilter = FilterDebuffs
+			self.Debuffs = Debuffs
+		end
 
 		local RoleIcon = self:CreateTexture(nil, 'OVERLAY')
 		RoleIcon:SetPoint('CENTER')
@@ -489,9 +491,11 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 		Castbar.Spark = Spark
 	end
 
-	-- Binds whatever dispel ability the class/spec provides to middle mouse button
-	self:SetAttribute('type3', 'macro')
-	self:SetAttribute('macrotext', clickMacro)
+	if(self:GetAttribute('healerLayout')) then
+		-- Binds whatever dispel ability the class/spec provides to middle mouse button
+		self:SetAttribute('type3', 'macro')
+		self:SetAttribute('macrotext', clickMacro)
+	end
 
 	if(UnitSpecific[unit]) then
 		return UnitSpecific[unit](self)
@@ -515,6 +519,7 @@ oUF:SpawnHeader('oUF_KrittHealerRaid', nil, nil,
 	'unitsPerColumn', 5,
 	'columnSpacing', 5,
 	'columnAnchorPoint', 'RIGHT',
+	'healerLayout', true,
 	'oUF-initialConfigFunction', [[
 		self:SetWidth(90)
 		self:SetHeight(35)
