@@ -6,6 +6,7 @@
 ## RequiredDeps: oUF
 ## OptionalDeps: oUF_Resurrect, oUF_DispelHighlight
 
+data\buffs.lua
 
 Tags.lua
 oUF_Kritt.lua

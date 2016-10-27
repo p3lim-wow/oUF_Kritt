@@ -1,5 +1,5 @@
 ﻿local _, ns = ...
-local oUF = ns.oUF
+local buffWhitelist = ns.buffs
 
 local FONT = [[Interface\AddOns\oUF_Kritt\assets\semplice.ttf]]
 local TEXTURE = [[Interface\ChatFrame\ChatFrameBackground]]
@@ -131,7 +131,7 @@ local function UpdateRoleIconVisibility(self)
 	self.LFDRole:SetAlpha(IsAltKeyDown() and not UnitAffectingCombat('player') and  1 or 0)
 end
 
-local function PostCreateAura(element, Button)
+local function PostCreateGroupAura(element, Button)
 	Button.cd:SetReverse(true)
 	Button.cd:SetHideCountdownNumbers(true)
 	Button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
@@ -150,9 +150,8 @@ local function OnUpdateAura(self, elapsed)
 	end
 end
 
-local function PostCreateTargetAura(element, Button)
+local function PostCreateAura(element, Button)
 	Button.cd:SetReverse(true)
-	PostCreateAura(element, Button)
 	Button.cd:SetHideCountdownNumbers(true)
 
 	Button:SetBackdrop(BACKDROP)
@@ -176,7 +175,7 @@ local function PostCreateTargetAura(element, Button)
 	Button:HookScript('OnUpdate', OnUpdateAura)
 end
 
-local function PostUpdateTargetAura(element, unit, Button, index)
+local function PostUpdateAura(element, unit, Button, index)
 	local _, _, _, _, _, duration, expiration, owner, canStealOrPurge = UnitAura(unit, index, Button.filter)
 
 	if(duration and duration > 0) then
@@ -201,63 +200,10 @@ local function PostUpdateCast(element, unit)
 	end
 end
 
-local buffWhitelist = {
-	-- Paladin, Holy
-	[1022] = true, -- Blessing of Protection
-	[1044] = true, -- Blessing of Freedom
-	[6940] = true, -- Blessing of Sacrifice
-	[31821] = true, -- Aura Mastery
-	[53563] = true, -- Beacon of Light
-	[200025] = true, -- Talent: Beacon of Virtue
-	[156910] = true, -- Talent: Beacon of Faith
-	[223306] = true, -- Talent: Bestow Faith
-	[200652] = true, -- Artifact: Tyr's Deliverance (HoT)
-	[200654] = true, -- Artifact: Tyr's Deliverance (Healing Increase)
-	[211210] = true, -- Artifact Trait: Protection of Tyr
-
-	-- Priest, Holy
-	[139] = true, -- Renew
-	[41635] = true, -- Prayer of Mending
-	[47788] = true, -- Guardian Spirit
-	[64844] = true, -- Divine Hymn
-	[77489] = true, -- Mastery: Echo of Light
-	[214121] = true, -- Talent: Body and Mind
-	[196816] = true, -- Artifact: Tranquil Light
-	[196356] = true, -- Artifact Trait: Trust in the Light
-	[208065] = true, -- Artifact Trait: Light of T'uure
-
-	-- Priest, Discipline
-	[17] = true, -- Power Word: Shield
-	[33206] = true, --Pain Suppression
-	[81782] = true, -- Power Word: Barrier
-	[194384] = true, -- Atonement
-	[152118] = true, -- Talent: Clarity of Will
-
-	-- Shaman, Resto
-	[61295] = true, -- Riptide
-	[98007] = true, -- Spirit Link
-	[208899] = true, -- Artifact Trait: Queen's Decree
-
-	-- Druid, Resto
-	[774] = true, -- Rejuvenation
-	[8936] = true, -- Regrowth
-	[33763] = true, -- Lifebloom
-	[48438] = true, -- Wild Growth
-	[48504] = true, -- Living Seed
-	[102342] = true, -- Ironbark
-	[102351] = true, -- Talent: Cenarion Ward (Trigger)
-	[102352] = true, -- Talent: Cenarion Ward (HoT)
-	[200389] = true, -- Talent: Cultivation
-	[207386] = true, -- Talent: Spring Blossoms
-	[155777] = true, -- Talent: Germination
-
-	-- Monk, Mistweaver
-	[119611] = true, -- Renewing Mist
-	[115175] = true, -- Soothing Mist
-	[191840] = true, -- Essence Font
-	[124682] = true, -- Enveloping Mist
-	[116849] = true, -- Life Cocoon
-}
+local function FilterTargetDebuffs(...)
+	local _, unit, _, _, _, _, _, _, _, _, owner, _, _, id = ...
+	return owner == 'player' or owner == 'vehicle' or UnitIsFriend('player', unit)
+end
 
 local function FilterBuffs(...)
 	local _, _, _, _, _, _, _, _, _, _, caster, _, _, spellID = ...
@@ -336,26 +282,26 @@ local UnitSpecific = {
 	target = function(self, unit)
 		local Buffs = CreateFrame('Frame', nil, self)
 		Buffs:SetPoint('TOPLEFT', self, 'TOPRIGHT', 3, 0)
-		Buffs:SetSize(236, 44)
+		Buffs.size = self:GetHeight()
+		Buffs:SetSize(self:GetWidth() / 2, Buffs.size)
 		Buffs.num = 27
-		Buffs.size = 22
 		Buffs.spacing = 3
 		Buffs.initialAnchor = 'TOPLEFT'
 		Buffs['growth-y'] = 'DOWN'
-		Buffs.PostCreateIcon = PostCreateTargetAura
-		Buffs.PostUpdateIcon = PostUpdateTargetAura
+		Buffs.PostCreateIcon = PostCreateAura
+		Buffs.PostUpdateIcon = PostUpdateAura
 		self.Buffs = Buffs
 
 		local Debuffs = CreateFrame('Frame', nil, self)
 		Debuffs:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 0, 3)
-		Debuffs:SetSize(22, 200)
-		Debuffs.num = 10
-		Debuffs.size = 22
+		Debuffs.size = self:GetHeight()
+		Debuffs:SetSize(self:GetWidth(), Debuffs.size)
 		Debuffs.spacing = 3
 		Debuffs.initialAnchor = 'BOTTOMLEFT'
 		Debuffs['growth-y'] = 'UP'
-		Debuffs.PostCreateIcon = PostCreateTargetAura
-		Debuffs.PostUpdateIcon = PostUpdateTargetAura
+		Debuffs.PostCreateIcon = PostCreateAura
+		Debuffs.PostUpdateIcon = PostUpdateAura
+		Debuffs.CustomFilter = FilterTargetDebuffs
 		self.Debuffs = Debuffs
 
 		self.Castbar.PostCastStart = PostUpdateCast
@@ -387,7 +333,7 @@ local UnitSpecific = {
 		Buffs.size = 10
 		Buffs.num = 7
 		Buffs.spacing = 3
-		Buffs.PostCreateIcon = PostCreateAura
+		Buffs.PostCreateIcon = PostCreateGroupAura
 		Buffs.CustomFilter = FilterBuffs
 		self.Buffs = Buffs
 
@@ -397,7 +343,7 @@ local UnitSpecific = {
 		Debuffs.size = 10
 		Debuffs.num = 7
 		Debuffs.spacing = 3
-		Debuffs.PostCreateIcon = PostCreateAura
+		Debuffs.PostCreateIcon = PostCreateGroupAura
 		Debuffs.CustomFilter = FilterDebuffs
 		self.Debuffs = Debuffs
 
