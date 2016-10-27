@@ -557,7 +557,7 @@ oUF:SetActiveStyle('Kritt')
 
 oUF:Spawn('player'):SetPoint('CENTER', -300, -250)
 oUF:Spawn('target'):SetPoint('CENTER', 300, -250)
-oUF:Spawn('targettarget'):SetPoint('TOPRIGHT', oUF_KrittTarget, 'BOTTOMRIGHT', 0, -5)
+oUF:Spawn('targettarget'):SetPoint('TOPRIGHT', oUF_KrittTarget, 'BOTTOMRIGHT', 0, -15)
 
 oUF:SpawnHeader('oUF_KrittHealerRaid', nil, nil,
 	'showPlayer', true,
