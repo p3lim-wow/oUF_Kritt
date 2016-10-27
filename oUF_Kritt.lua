@@ -151,11 +151,15 @@ local function OnUpdateAura(self, elapsed)
 end
 
 local function PostCreateTargetAura(element, Button)
+	Button.cd:SetReverse(true)
 	PostCreateAura(element, Button)
+	Button.cd:SetHideCountdownNumbers(true)
 
 	Button:SetBackdrop(BACKDROP)
 	Button:SetBackdropBorderColor(0, 0, 0)
 
+	Button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+	Button.icon:SetDrawLayer('ARTWORK')
 	Button.icon:ClearAllPoints()
 	Button.icon:SetPoint('TOPLEFT', 1, -1)
 	Button.icon:SetPoint('BOTTOMRIGHT', -1, 1)
