@@ -1,4 +1,4 @@
-local tags = select(2, ...).oUF.Tags
+local tags = oUF.Tags
 
 local gsub = string.gsub
 local format = string.format

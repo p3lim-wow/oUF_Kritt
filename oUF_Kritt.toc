@@ -3,17 +3,9 @@
 ## Version: Alpha
 ## Title: oUF Kritt
 ## Notes: Healer-oriented raid frames
-## X-oUF: oUF_Kritt
+## RequiredDeps: oUF
+## OptionalDeps: oUF_Resurrect, oUF_DispelHighlight
 
-embeds\oUF\oUF.xml
-embeds\oUF_Resurrect\embed.xml
-embeds\oUF_DispelHighlight\oUF_DispelHighlight.lua
-
-#@do-not-package@
-..\oUF\oUF.xml
-..\oUF_Resurrect\oUF_Resurrect.xml
-..\oUF_DispelHighlight\oUF_DispelHighlight.lua
-#@end-do-not-package@
 
 Tags.lua
 oUF_Kritt.lua
