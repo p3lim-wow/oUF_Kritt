@@ -503,7 +503,7 @@ oUF:SetActiveStyle('Kritt')
 oUF:Spawn('player'):SetPoint('CENTER', -300, -250)
 oUF:Spawn('target'):SetPoint('CENTER', 300, -250)
 
-oUF:SpawnHeader(nil, nil, nil,
+oUF:SpawnHeader('oUF_KrittHealerRaid', nil, nil,
 	'showPlayer', true,
 	'showParty', true,
 	'showRaid', true,
@@ -521,6 +521,19 @@ oUF:SpawnHeader(nil, nil, nil,
 	]]
 ):SetPoint('RIGHT', UIParent, 'LEFT', 776, -100)
 
+oUF:SpawnHeader(nil, nil, nil,
+	'showPlayer', true,
+	'showParty', true,
+	'showRaid', true,
+	'yOffset', -5,
+	'groupBy', 'ASSIGNEDROLE',
+	'groupingOrder', 'TANK,HEALER,DAMAGER',
+	'oUF-initialConfigFunction', [[
+		self:SetWidth(126)
+		self:SetHeight(20)
+	]]
+):SetPoint('TOP', Minimap, 'BOTTOM', 0, -10)
+
 local visibilityConditions = '[group:raid,nogroup:party] show; [group:party] show; hide'
 
 local Handler = CreateFrame('Frame')
@@ -531,8 +544,10 @@ Handler:SetScript('OnEvent', function()
 	end
 
 	if(GetSpecializationRole(GetSpecialization() or 0) == 'HEALER') then
-		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', visibilityConditions)
-	else
 		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', 'hide')
+		RegisterAttributeDriver(oUF_KrittHealerRaid, 'state-visibility', visibilityConditions)
+	else
+		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', visibilityConditions)
+		RegisterAttributeDriver(oUF_KrittHealerRaid, 'state-visibility', 'hide')
 	end
 end)
