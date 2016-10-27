@@ -320,6 +320,17 @@ local UnitSpecific = {
 		PowerValue:SetWordWrap(false)
 		self:Tag(PowerValue, '[powercolor][kritt:curpp]|r[ |cff0090ff>kritt:addpp<%|r][ : >kritt:cast]')
 
+		local Debuffs = CreateFrame('Frame', nil, self)
+		Debuffs:SetPoint('TOPRIGHT', self, 'TOPLEFT', -3, 0)
+		Debuffs.size = self:GetHeight()
+		Debuffs:SetSize(self:GetWidth() / 2, Debuffs.size)
+		Debuffs.spacing = 3
+		Debuffs.initialAnchor = 'TOPRIGHT'
+		Debuffs['growth-x'] = 'LEFT'
+		Debuffs.PostCreateIcon = PostCreateAura
+		Debuffs.PostUpdateIcon = PostUpdateAura
+		self.Debuffs = Debuffs
+
 		self:Tag(self.HealthValue, '[kritt:status][kritt:maxhp][|cffff8080->kritt:defhp<|r][ >kritt:perhp<|cff0090ff%|r]')
 	end,
 	target = function(self, unit)
