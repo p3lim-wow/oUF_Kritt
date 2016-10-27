@@ -352,6 +352,10 @@ local UnitSpecific = {
 		self:Tag(self.HealthValue, '[kritt:status][kritt:curhp][ >kritt:targethp]')
 		self:Tag(self.Name, '[kritt:name]')
 	end,
+	targettarget = function(self, unit)
+		self:SetSize(150, 18)
+		self:Tag(self.Name, '[kritt:name]')
+	end,
 	party = function(self, unit)
 		local Power = self.Power
 		Power:SetPoint('BOTTOMLEFT', 1, 1)
@@ -546,6 +550,7 @@ oUF:SetActiveStyle('Kritt')
 
 oUF:Spawn('player'):SetPoint('CENTER', -300, -250)
 oUF:Spawn('target'):SetPoint('CENTER', 300, -250)
+oUF:Spawn('targettarget'):SetPoint('TOPRIGHT', oUF_KrittTarget, 'BOTTOMRIGHT', 0, -5)
 
 oUF:SpawnHeader('oUF_KrittHealerRaid', nil, nil,
 	'showPlayer', true,
