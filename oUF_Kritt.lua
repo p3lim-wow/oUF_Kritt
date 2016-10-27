@@ -106,7 +106,13 @@ local function UpdatePower(self, event, unit)
 end
 
 local function PostUpdatePower(element, unit, cur, max)
-	element:GetParent():SetShown(max ~= 0 and cur ~= 0 and cur ~= max)
+	if(unit == 'PLAYER_REGEN_ENABLED' or unit == 'PLAYER_REGEN_DISABLED' or event == 'UNIT_FLAGS') then
+		unit = element.unit
+		element = element.Power
+		cur, max = UnitPower(unit), UnitPowerMax(unit)
+	end
+
+	element:GetParent():SetAlpha((max ~= 0 and UnitAffectingCombat(unit) or (cur ~= 0 and cur ~= max)) and 1 or 0)
 end
 
 local function UpdateRoleIcon(self)
@@ -504,6 +510,10 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 		Power.colorTapping = true
 		Power.colorDisconnected = true
 		Power.colorReaction = true
+
+		self:RegisterEvent('UNIT_FLAGS', PostUpdatePower)
+		self:RegisterEvent('PLAYER_REGEN_ENABLED', PostUpdatePower)
+		self:RegisterEvent('PLAYER_REGEN_DISABLED', PostUpdatePower)
 
 		local Castbar = CreateFrame('StatusBar', nil, self)
 		Castbar:SetAllPoints()
