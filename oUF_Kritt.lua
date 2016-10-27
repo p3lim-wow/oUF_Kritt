@@ -115,6 +115,20 @@ local function PostUpdatePower(element, unit, cur, max)
 	element:GetParent():SetAlpha((max ~= 0 and UnitAffectingCombat(unit) or (cur ~= 0 and cur ~= max)) and 1 or 0)
 end
 
+local function PostUpdateTotem(element)
+	local shown = {}
+	for index = 1, MAX_TOTEMS do
+		local Totem = element[index]
+		if(Totem:IsShown()) then
+			local prevShown = shown[#shown]
+
+			Totem:ClearAllPoints()
+			Totem:SetPoint('TOPLEFT', shown[#shown] or element.__owner, 'TOPRIGHT', 4, -1)
+			table.insert(shown, Totem)
+		end
+	end
+end
+
 local function UpdateRoleIcon(self)
 	local element = self.LFDRole
 
@@ -276,6 +290,32 @@ local UnitSpecific = {
 		Debuffs.PostCreateIcon = PostCreateAura
 		Debuffs.PostUpdateIcon = PostUpdateAura
 		self.Debuffs = Debuffs
+
+		local Totems = {}
+		Totems.PostUpdate = PostUpdateTotem
+
+		for index = 1, MAX_TOTEMS do
+			local Totem = CreateFrame('Button', nil, self)
+			Totem:SetSize(20, 20)
+
+			local Icon = Totem:CreateTexture(nil, 'OVERLAY')
+			Icon:SetAllPoints()
+			Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+			Totem.Icon = Icon
+
+			local Background = Totem:CreateTexture(nil, 'BORDER')
+			Background:SetPoint('TOPLEFT', -1, 1)
+			Background:SetPoint('BOTTOMRIGHT', 1, -1)
+			Background:SetColorTexture(0, 0, 0)
+
+			local Cooldown = CreateFrame('Cooldown', nil, Totem, 'CooldownFrameTemplate')
+			Cooldown:SetAllPoints()
+			Cooldown:SetReverse(true)
+			Totem.Cooldown = Cooldown
+
+			Totems[index] = Totem
+		end
+		self.Totems = Totems
 
 		self:Tag(self.HealthValue, '[kritt:status][kritt:maxhp][|cffff8080->kritt:defhp<|r][ >kritt:perhp<|cff0090ff%|r]')
 	end,
