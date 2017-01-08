@@ -360,6 +360,10 @@ local UnitSpecific = {
 		self:SetSize(150, 18)
 		self:Tag(self.Name, '[kritt:name]')
 	end,
+	boss = function(self)
+		self:SetSize(128, 19)
+		self:Tag(self.Name, '[kritt:name]')
+	end,
 	party = function(self, unit)
 		local Power = self.Power
 		Power:SetPoint('BOTTOMLEFT', 1, 1)
@@ -570,3 +574,12 @@ oUF:SpawnHeader(nil, nil, 'custom [group:raid,nogroup:party] show; [group:party]
 		self:SetHeight(35)
 	]]
 ):SetPoint('RIGHT', UIParent, 'LEFT', 776, -100)
+
+for index = 1, 5 do
+	local boss = oUF:Spawn('boss' .. index)
+	if(index == 1) then
+		boss:SetPoint('TOP', Minimap, 'BOTTOM', 0, -10)
+	else
+		boss:SetPoint('TOP', _G['oUF_KrittBoss' .. index - 1], 'BOTTOM', 0, -6)
+	end
+end
