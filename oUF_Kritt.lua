@@ -375,27 +375,50 @@ local UnitSpecific = {
 		HealthValue:SetWordWrap(false)
 		self:Tag(HealthValue, '[kritt:grouphp]')
 
-		if(self:GetParent():GetAttribute('healerLayout')) then
-			local Buffs = CreateFrame('Frame', nil, self)
-			Buffs:SetPoint('TOPLEFT', 2, -2)
-			Buffs:SetSize(85, 10)
-			Buffs.size = 10
-			Buffs.num = 7
-			Buffs.spacing = 3
-			Buffs.PostCreateIcon = PostCreateGroupAura
-			Buffs.CustomFilter = FilterBuffs
-			self.Buffs = Buffs
+		local IncomingHeal = self:CreateTexture(nil, 'ARTWORK', nil, 1)
+		IncomingHeal:SetPoint('TOPLEFT', self.Health, 1, -1)
+		IncomingHeal:SetPoint('BOTTOMLEFT', self.Health, 1, 1)
+		IncomingHeal:SetPoint('RIGHT', self.Health, 'LEFT')
+		IncomingHeal:SetColorTexture(0, 0, 0, 3/5)
+		self.IncomingHeal = IncomingHeal
 
-			local Debuffs = CreateFrame('Frame', nil, self)
-			Debuffs:SetPoint('BOTTOMLEFT', 2, 2)
-			Debuffs:SetSize(85, 10)
-			Debuffs.size = 10
-			Debuffs.num = 7
-			Debuffs.spacing = 3
-			Debuffs.PostCreateIcon = PostCreateGroupAura
-			Debuffs.CustomFilter = FilterDebuffs
-			self.Debuffs = Debuffs
-		end
+		local Absorbs = self:CreateTexture()
+		Absorbs:SetPoint('TOPLEFT', self.Health)
+		Absorbs:SetPoint('BOTTOMLEFT', self.Health)
+		Absorbs:SetPoint('RIGHT', self.Health, 'LEFT')
+		Absorbs:SetColorTexture(0, 3/5, 4/5, 1)
+		self.Absorbs = Absorbs
+
+		local AbsorbBorder = self:CreateTexture(nil, 'ARTWORK', nil, 1)
+		AbsorbBorder:SetPoint('TOPRIGHT', Absorbs)
+		AbsorbBorder:SetPoint('BOTTOMRIGHT', Absorbs)
+		AbsorbBorder:SetWidth(1)
+		AbsorbBorder:SetColorTexture(1, 1, 1)
+		self.AbsorbsBorder = AbsorbBorder
+
+		self:RegisterEvent('UNIT_HEAL_PREDICTION', UpdateHealth)
+		self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', UpdateHealth)
+		self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', UpdateHealth)
+
+		local Buffs = CreateFrame('Frame', nil, self)
+		Buffs:SetPoint('TOPLEFT', 2, -2)
+		Buffs:SetSize(85, 10)
+		Buffs.size = 10
+		Buffs.num = 7
+		Buffs.spacing = 3
+		Buffs.PostCreateIcon = PostCreateGroupAura
+		Buffs.CustomFilter = FilterBuffs
+		self.Buffs = Buffs
+
+		local Debuffs = CreateFrame('Frame', nil, self)
+		Debuffs:SetPoint('BOTTOMLEFT', 2, 2)
+		Debuffs:SetSize(85, 10)
+		Debuffs.size = 10
+		Debuffs.num = 7
+		Debuffs.spacing = 3
+		Debuffs.PostCreateIcon = PostCreateGroupAura
+		Debuffs.CustomFilter = FilterDebuffs
+		self.Debuffs = Debuffs
 
 		local RoleIcon = self:CreateTexture(nil, 'OVERLAY')
 		RoleIcon:SetPoint('CENTER')
@@ -448,34 +471,6 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 	Health:SetColorTexture(2/3, 2/3, 2/3)
 	Health.Override = UpdateHealth
 	self.Health = Health
-
-	local healerLayout = self:GetParent():GetAttribute('healerLayout')
-	if(healerLayout or unit == 'player' or unit == 'target') then
-		self:RegisterEvent('UNIT_HEAL_PREDICTION', UpdateHealth)
-		self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', UpdateHealth)
-		self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', UpdateHealth)
-
-		local IncomingHeal = self:CreateTexture(nil, 'ARTWORK', nil, 1)
-		IncomingHeal:SetPoint('TOPLEFT', Health, 1, -1)
-		IncomingHeal:SetPoint('BOTTOMLEFT', Health, 1, 1)
-		IncomingHeal:SetPoint('RIGHT', Health, 'LEFT')
-		IncomingHeal:SetColorTexture(0, 0, 0, 3/5)
-		self.IncomingHeal = IncomingHeal
-
-		local Absorbs = self:CreateTexture()
-		Absorbs:SetPoint('TOPLEFT', Health)
-		Absorbs:SetPoint('BOTTOMLEFT', Health)
-		Absorbs:SetPoint('RIGHT', Health, 'LEFT')
-		Absorbs:SetColorTexture(0, 3/5, 4/5, 1)
-		self.Absorbs = Absorbs
-
-		local AbsorbBorder = self:CreateTexture(nil, 'ARTWORK', nil, 1)
-		AbsorbBorder:SetPoint('TOPRIGHT', Absorbs)
-		AbsorbBorder:SetPoint('BOTTOMRIGHT', Absorbs)
-		AbsorbBorder:SetWidth(1)
-		AbsorbBorder:SetColorTexture(1, 1, 1)
-		self.AbsorbsBorder = AbsorbBorder
-	end
 
 	local Power = CreateFrame('StatusBar', nil, self)
 	Power:SetStatusBarTexture(TEXTURE)
@@ -542,11 +537,9 @@ oUF:RegisterStyle('Kritt', function(self, unit)
 		Castbar.Spark = Spark
 	end
 
-	if(healerLayoyt) then
-		-- Binds whatever dispel ability the class/spec provides to middle mouse button
-		self:SetAttribute('type3', 'macro')
-		self:SetAttribute('macrotext', clickMacro)
-	end
+	-- Binds whatever dispel ability the class/spec provides to middle mouse button
+	self:SetAttribute('type3', 'macro')
+	self:SetAttribute('macrotext', clickMacro)
 
 	if(UnitSpecific[unit]) then
 		return UnitSpecific[unit](self)
@@ -559,7 +552,7 @@ oUF:Spawn('player'):SetPoint('CENTER', -300, -250)
 oUF:Spawn('target'):SetPoint('CENTER', 300, -250)
 oUF:Spawn('targettarget'):SetPoint('TOPRIGHT', oUF_KrittTarget, 'BOTTOMRIGHT', 0, -15)
 
-oUF:SpawnHeader('oUF_KrittHealerRaid', nil, nil,
+oUF:SpawnHeader(nil, nil, 'custom [group:raid,nogroup:party] show; [group:party] show; hide',
 	'showPlayer', true,
 	'showParty', true,
 	'showRaid', true,
@@ -577,34 +570,3 @@ oUF:SpawnHeader('oUF_KrittHealerRaid', nil, nil,
 		self:SetHeight(35)
 	]]
 ):SetPoint('RIGHT', UIParent, 'LEFT', 776, -100)
-
-oUF:SpawnHeader(nil, nil, nil,
-	'showPlayer', true,
-	'showParty', true,
-	'showRaid', true,
-	'yOffset', -5,
-	'groupBy', 'ASSIGNEDROLE',
-	'groupingOrder', 'TANK,HEALER,DAMAGER',
-	'oUF-initialConfigFunction', [[
-		self:SetWidth(126)
-		self:SetHeight(20)
-	]]
-):SetPoint('TOP', Minimap, 'BOTTOM', 0, -10)
-
-local visibilityConditions = '[group:raid,nogroup:party] show; [group:party] show; hide'
-
-local Handler = CreateFrame('Frame')
-Handler:RegisterEvent('PLAYER_TALENT_UPDATE')
-Handler:SetScript('OnEvent', function()
-	if(InCombatLockdown()) then
-		return
-	end
-
-	if(GetSpecializationRole(GetSpecialization() or 0) == 'HEALER') then
-		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', 'hide')
-		RegisterAttributeDriver(oUF_KrittHealerRaid, 'state-visibility', visibilityConditions)
-	else
-		RegisterAttributeDriver(oUF_KrittRaid, 'state-visibility', visibilityConditions)
-		RegisterAttributeDriver(oUF_KrittHealerRaid, 'state-visibility', 'hide')
-	end
-end)
