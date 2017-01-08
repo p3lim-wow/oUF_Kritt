@@ -83,6 +83,26 @@ local function UpdateHealth(self, event, unit)
 	end
 end
 
+local OVERFLOW = GetSpellInfo(221772) -- Overflow, a Mythic+ affix
+local function UpdateNegativeAbsorb(self, event, unit)
+	if(unit ~= self.unit) then
+		return
+	end
+
+	local element = self.NegativeAbsorb
+	local amount = select(17, UnitAura(unit, OVERFLOW, nil, 'HARMFUL'))
+	if(amount and amount > 0) then
+		local max = UnitHealthMax(unit)
+		local width = self:GetWidth()
+
+		local offset = (width - 1) * (1 - ((max - amount) / max))
+		element:SetPoint('RIGHT', self.Health, 'LEFT', -offset, 0)
+		element:Show()
+	else
+		element:Hide()
+	end
+end
+
 local function UpdatePower(self, event, unit)
 	if(unit ~= self.unit) then
 		return
@@ -403,6 +423,16 @@ local UnitSpecific = {
 		self:RegisterEvent('UNIT_HEAL_PREDICTION', UpdateHealth)
 		self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', UpdateHealth)
 		self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', UpdateHealth)
+
+		local NegativeAbsorb = self:CreateTexture()
+		NegativeAbsorb:SetPoint('TOPLEFT', self.Health)
+		NegativeAbsorb:SetPoint('BOTTOMLEFT', self.Health)
+		NegativeAbsorb:SetPoint('RIGHT', self.Health, 'LEFT')
+		NegativeAbsorb:SetColorTexture(4/5, 1/4, 4/5, 1/3)
+		self.NegativeAbsorb = NegativeAbsorb
+
+		self:RegisterEvent('UNIT_AURA', UpdateNegativeAbsorb)
+		UpdateNegativeAbsorb(self, 'init', self.unit)
 
 		local Buffs = CreateFrame('Frame', nil, self)
 		Buffs:SetPoint('TOPLEFT', 2, -2)
