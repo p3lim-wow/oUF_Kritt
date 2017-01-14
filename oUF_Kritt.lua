@@ -83,23 +83,32 @@ local function UpdateHealth(self, event, unit)
 	end
 end
 
-local OVERFLOW = GetSpellInfo(221772) -- Overflow, a Mythic+ affix
-local function UpdateNegativeAbsorb(self, event, unit)
-	if(unit ~= self.unit) then
-		return
-	end
+local absorbSpells = {
+	[221772] = true, -- Overflow, a Mythic+ affix
+	[211125] = true, -- Parallel Dimension, trash @ Arcway
+	[232450] = true, -- Corrupted Axion, Guarm @ Trial of Valor
+	[228253] = true, -- Shadow Lick, Helya @ Trial of Valor
+	[228835] = true, -- Absorb Vitality, Nightbane @ Karazhan
+}
 
-	local element = self.NegativeAbsorb
-	local amount = select(17, UnitAura(unit, OVERFLOW, nil, 'HARMFUL'))
-	if(amount and amount > 0) then
-		local max = UnitHealthMax(unit)
-		local width = self:GetWidth()
+local function UpdateNegativeAbsorb(self, ...)
+	local _, _, event, _, _, _, _, _, guid, _, _, _, spellID, spellName = ...
 
-		local offset = (width - 1) * (1 - ((max - amount) / max))
-		element:SetPoint('RIGHT', self.Health, 'LEFT', -offset, 0)
-		element:Show()
-	else
-		element:Hide()
+	if(absorbSpells[spellID]) then
+		local element = self.HealAbsorb
+		if(event == 'SPELL_AURA_REFRESHED' or event == 'SPELL_AURA_APPLIED') then
+			local amount = select(17, UnitAura(self.unit, spellName, nil, 'HARMFUL')) or 350000
+			if(amount) then
+				local max = UnitHealthMax(self.unit)
+				local width = self:GetWidth()
+
+				local offset = (width - 1) * (1 - ((max - amount) / max))
+				element:SetPoint('RIGHT', self.Health, 'LEFT', -offset, 0)
+				element:Show()
+			end
+		elseif(event == 'SPELL_AURA_REMOVED' or event == 'SPELL_AURA_BROKEN' or event == 'SPELL_AURA_BROKEN_SPELL') then
+			element:Hide()
+		end
 	end
 end
 
@@ -424,15 +433,14 @@ local UnitSpecific = {
 		self:RegisterEvent('UNIT_ABSORB_AMOUNT_CHANGED', UpdateHealth)
 		self:RegisterEvent('UNIT_HEAL_ABSORB_AMOUNT_CHANGED', UpdateHealth)
 
-		local NegativeAbsorb = self:CreateTexture()
-		NegativeAbsorb:SetPoint('TOPLEFT', self.Health)
-		NegativeAbsorb:SetPoint('BOTTOMLEFT', self.Health)
-		NegativeAbsorb:SetPoint('RIGHT', self.Health, 'LEFT')
-		NegativeAbsorb:SetColorTexture(4/5, 1/4, 4/5, 1/3)
-		self.NegativeAbsorb = NegativeAbsorb
+		local HealAbsorb = self:CreateTexture()
+		HealAbsorb:SetPoint('TOPLEFT', self.Health)
+		HealAbsorb:SetPoint('BOTTOMLEFT', self.Health)
+		HealAbsorb:SetPoint('RIGHT', self.Health, 'LEFT')
+		HealAbsorb:SetColorTexture(4/5, 1/4, 4/5, 1/3)
+		self.HealAbsorb = HealAbsorb
 
-		self:RegisterEvent('UNIT_AURA', UpdateNegativeAbsorb)
-		UpdateNegativeAbsorb(self, 'init', self.unit)
+		self:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED', UpdateNegativeAbsorb)
 
 		local Buffs = CreateFrame('Frame', nil, self)
 		Buffs:SetPoint('TOPLEFT', 2, -2)
