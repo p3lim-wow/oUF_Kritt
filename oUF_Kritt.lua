@@ -602,7 +602,7 @@ oUF:SpawnHeader(nil, nil, 'custom [group:raid,nogroup:party] show; [group:party]
 	'point', 'TOP',
 	'groupBy', 'ASSIGNEDROLE',
 	'groupingOrder', 'TANK,HEALER,DAMAGER',
-	'maxColumns', 5,
+	'maxColumns', 6,
 	'unitsPerColumn', 5,
 	'columnSpacing', 5,
 	'columnAnchorPoint', 'RIGHT',
